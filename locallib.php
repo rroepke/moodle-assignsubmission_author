@@ -741,25 +741,6 @@ class assign_submission_author extends assign_submission_plugin
                 'context' => $this->assignment->get_context()
             ));
             message_send($eventdata);
-            $eventdata = new stdClass();
-            $eventdata->modulename = 'assign';
-            $eventdata->userfrom = $USER;
-            $eventdata->userto = $userto;
-            $eventdata->subject = $subject;
-            $eventdata->fullmessage = $message;
-            $eventdata->fullmessageformat = FORMAT_PLAIN;
-            $eventdata->fullmessagehtml = $message;
-            $eventdata->smallmessage = $subject;
-
-            $eventdata->name = 'assign_notification';
-            $eventdata->component = 'mod_assign';
-            $eventdata->notification = 1;
-            $eventdata->contexturl = $CFG->wwwroot . '/mod/assign/view.php?id=' . $this->assignment->get_course_module()->id;
-            $eventdata->contexturlname = format_string($this->assignment->get_instance()->name, true, array(
-                'context' => $this->assignment->get_context()
-            ));
-
-            message_send($eventdata);
         }
     }
 
@@ -863,9 +844,9 @@ class assign_submission_author extends assign_submission_plugin
             }
 
             // Get a record set of all enrolled 'students' (roleid = 5).
-            $queryfields = 'u.id as id, firstname, lastname, picture, imagealt, email';
-            $query = 'select ' . $queryfields . ' from {role_assignments} as a, {user} as u where contextid=' .
-                $this->assignment->get_course_context()->id . ' and roleid=5 and a.userid=u.id;';
+            $queryfields = '{user}.id, firstname, lastname, picture, imagealt, email';
+            $query = 'select ' . $queryfields . ' from {role_assignments}, {user} where contextid=' .
+                $this->assignment->get_course_context()->id . ' and roleid=5 and {role_assignments}.userid={user}.id;';
             $rs = $DB->get_recordset_sql($query);
             $students = array();
             foreach ($rs as $r) {
@@ -918,9 +899,9 @@ class assign_submission_author extends assign_submission_plugin
             $records = $users;
 
             // Get a record set of all enrolled 'students' (roleid = 5).
-            $queryfields = 'u.id as id, firstname, lastname, picture, imagealt, email';
-            $query = 'select ' . $queryfields . ' from mdl_role_assignments as a, mdl_user as u where contextid=' .
-                $this->assignment->get_course_context()->id . ' and roleid=5 and a.userid=u.id;';
+            $queryfields = '{user}.id, firstname, lastname, picture, imagealt, email';
+            $query = 'select ' . $queryfields . ' from {role_assignments}, {user} where contextid=' .
+                $this->assignment->get_course_context()->id . ' and roleid=5 and {role_assignments}.userid={user}.id;';
             $rs = $DB->get_recordset_sql($query);
             $students = array();
             foreach ($rs as $r) {
