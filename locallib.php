@@ -1,4 +1,5 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -108,11 +109,19 @@ class assign_submission_author extends assign_submission_plugin
      */
     public function save_settings(stdClass $data) {
         // Set config info.
-        $this->set_config('maxauthors', isset($data->assignsubmissionauthor_maxauthors) ? $data->assignsubmissionauthor_maxauthors : 0);
-        $this->set_config('ingroupsonly', (isset($data->assignsubmissionauthor_groupsused)
-            && $data->assignsubmissionauthor_groupsused == 1) ? (isset($data->assignsubmissionauthor_ingroupsonly) ? $data->assignsubmissionauthor_ingroupsonly : 0) : 0);
-        $this->set_config('notification', isset($data->assignsubmissionauthor_notification) ? $data->assignsubmissionauthor_notification : 0);
-        $this->set_config('groupsused', isset($data->assignsubmissionauthor_groupsused) ? $data->assignsubmissionauthor_groupsused : 0);
+        $checkmaxauthors = isset($data->assignsubmissionauthor_maxauthors);
+        $this->set_config('maxauthors',
+            $checkmaxauthors ? $data->assignsubmissionauthor_maxauthors : 0);
+        $checkgroupsused = isset($data->assignsubmissionauthor_groupsused) && $data->assignsubmissionauthor_groupsused == 1;
+        $checkingroupsonly = isset($data->assignsubmissionauthor_ingroupsonly);
+        $this->set_config('ingroupsonly',
+            $checkgroupsused ? ($checkingroupsonly ? $data->assignsubmissionauthor_ingroupsonly : 0) : 0);
+        $checknotification = isset($data->assignsubmissionauthor_notification);
+        $this->set_config('notification',
+            $checknotification ? $data->assignsubmissionauthor_notification : 0);
+        $checkgroupsused =  isset($data->assignsubmissionauthor_groupsused);
+        $this->set_config('groupsused',
+            $checkgroupsused ? $data->assignsubmissionauthor_groupsused : 0);
         return true;
     }
 
@@ -223,7 +232,8 @@ class assign_submission_author extends assign_submission_plugin
             }
 
             // Add elements.
-            $grp = &$mform->addElement('group', 'coauthorselection', get_string('coauthors', 'assignsubmission_author'), $objs, ' ', false);
+            $grp = &$mform->addElement('group', 'coauthorselection',
+                get_string('coauthors', 'assignsubmission_author'), $objs, ' ', false);
             $mform->disabledIf('coauthorselection', 'selcoauthors', 'notchecked');
             $mform->addElement('checkbox', 'asdefault', ' ', get_string('asdefault', 'assignsubmission_author'));
             $mform->disabledIf('asdefault', 'selcoauthors', 'notchecked');
@@ -250,8 +260,10 @@ class assign_submission_author extends assign_submission_plugin
 
         // If default then display 2nd option for default.
         if (isset($showdefault) && $showdefault && isset($default)) {
-            $mform->addElement('checkbox', 'defcoauthors', '', get_string('choose_defaultcoauthors', 'assignsubmission_author'), 1);
-            $mform->addElement('static', 'defaultcoauthors', get_string('defaultcoauthors', 'assignsubmission_author'), $default, 1);
+            $mform->addElement('checkbox', 'defcoauthors', '',
+                get_string('choose_defaultcoauthors', 'assignsubmission_author'), 1);
+            $mform->addElement('static', 'defaultcoauthors',
+                get_string('defaultcoauthors', 'assignsubmission_author'), $default, 1);
             $mform->addElement('static', '', '', '');
         }
 
@@ -269,8 +281,9 @@ class assign_submission_author extends assign_submission_plugin
      * @return boolean true if default coauthors can be used
      */
     private function is_default_usable($defaults, $possibles, $count) {
-        if (count($defaults) > $count - 1)
+        if (count($defaults) > $count - 1) {
             return false;
+        }
         foreach ($defaults as $author => $value) {
             if (!array_key_exists($author, $possibles)) {
                 return false;
@@ -418,7 +431,7 @@ class assign_submission_author extends assign_submission_plugin
                             $this->create_author_group($newcoauthors, $submission, $authorlist);
                             $this->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist);
 
-                            // Update own author submission
+                            // Update own author submission.
                             $this->update_author_submission($authorsubmission, $author, $authorlist);
 
                             // If onlinetext plugin is enabled then update/create submissions.
@@ -461,7 +474,7 @@ class assign_submission_author extends assign_submission_plugin
                         $this->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist);
                         $this->create_author_group($newcoauthors, $submission, $authorlist);
 
-                        // Update own author submission
+                        // Update own author submission.
                         $this->update_author_submission($authorsubmission, $author, $authorlist);
 
                         // If onlinetext plugin is enabled then update/create submissions.
