@@ -1,5 +1,4 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +17,11 @@
  * This file defines the admin settings for this plugin
  *
  * @package assignsubmission_author
+ * @author Rene Roepke
+ * @author Guido Roessling
  * @copyright 2013 Rene Roepke
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-$settings->add(new admin_setting_configcheckbox('assignsubmission_author/default', new lang_string('default', 'assignsubmission_author'), new lang_string('default_help', 'assignsubmission_author'), 0));
+$settings->add(new admin_setting_configcheckbox('assignsubmission_author/default',
+    new lang_string('default', 'assignsubmission_author'),
+    new lang_string('default_help', 'assignsubmission_author'), 0));

@@ -48,8 +48,8 @@ $string['ingroupsonly'] = 'Nur in der selben Gruppe';
 $string['ingroupsonly_help'] = 'Wenn diese Option ausgewählt ist, können Teilnehmer/innen nur aus der eigenen Gruppe Co-Autoren auswählen, wenn nicht, dann aus dem ganzen Kurs.';
 $string['notification'] = 'Benachrichtung aller Co-Autoren';
 $string['notification_help'] = 'Wenn diese Option ausgewählt ist, werden alle Co-Autoren bei Abgabe benachrichtigt';
-$string['groupsused']='Gruppenmodus aktiv?';
-$string['groupsused_help']='Ist der Gruppenmodus aktiviert und diese Option wird ausgewählt, dann wird zur Nutzung von Autorengruppen vorausgesetzt, dass der Teilnehmer in eine Gruppe eingetragen ist. Ist er es nicht, kann er keine Autorengruppe auswählen.';
+$string['groupsused'] = 'Gruppenmodus aktiv?';
+$string['groupsused_help'] = 'Ist der Gruppenmodus aktiviert und diese Option wird ausgewählt, dann wird zur Nutzung von Autorengruppen vorausgesetzt, dass der Teilnehmer in eine Gruppe eingetragen ist. Ist er es nicht, kann er keine Autorengruppe auswählen.';
 $string['asdefault'] = 'Als neue Standard-Co-Autoren für diesen Kurs speichern';
 
 $string['default'] = 'Standardmäßig aktiviert';
@@ -60,4 +60,4 @@ $string['enabled_help'] = 'Teilnehmer/innen können nach der Aktivierung fü ihr
 $string['pluginname'] = 'Abgabe als Autorengruppen';
 $string['nopossiblecoauthors'] = 'Sie können keine Co-Autoren auswählen, da sie keiner Gruppe angehören. Bitte kontaktieren Sie den Veranstalter des Kurses.';
 
-$string['error_teamsubmission']='Es kann keine Lösung eingereicht werden. <br><br>Der Abgabetyp "Autorengruppen" kann nicht gemeinsam mit der Einstellung für Gruppeneinreichungen genutzt werden. Bitte kontaktieren Sie bei weiteren Fragen den Veranstalter des Kurses.';
+$string['error_teamsubmission'] = 'Es kann keine Lösung eingereicht werden. <br><br>Der Abgabetyp "Autorengruppen" kann nicht gemeinsam mit der Einstellung für Gruppeneinreichungen genutzt werden. Bitte kontaktieren Sie bei weiteren Fragen den Veranstalter des Kurses.';

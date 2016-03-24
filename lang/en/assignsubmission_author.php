@@ -48,8 +48,8 @@ $string['ingroupsonly'] = 'Only in the same group';
 $string['ingroupsonly_help'] = 'If enabled, then the user can only choose co-authors out of his own group, else out of the whole course';
 $string['notification'] = 'Inform all co-authors';
 $string['notification_help'] = 'If enabled, then all co-authors will get a message after a submission';
-$string['groupsused']='Groups enabled?';
-$string['groupsused_help']='If groups and this option are enabled, only members of groups are able to choose co-authors. Others won\'t be able to choose co-authors.';
+$string['groupsused'] = 'Groups enabled?';
+$string['groupsused_help'] = 'If groups and this option are enabled, only members of groups are able to choose co-authors. Others won\'t be able to choose co-authors.';
 $string['asdefault'] = 'Save as new default co-authors in this course';
 
 $string['default'] = 'Enabled by default';
@@ -61,4 +61,4 @@ $string['nosubmission'] = 'Nothing has been submitted for this assignment';
 $string['pluginname'] = 'Author groups submission';
 $string['nopossiblecoauthors'] = 'You cannot choose co-authors because you are not in a group. Please contact the course manager.';
 
-$string['error_teamsubmission']='You cannot submit a solution. <br><br>The submission type "Author groups" cannot be used with the group submission settings. Please contact the course manager if you have any questions.';
+$string['error_teamsubmission'] = 'You cannot submit a solution. <br><br>The submission type "Author groups" cannot be used with the group submission settings. Please contact the course manager if you have any questions.';

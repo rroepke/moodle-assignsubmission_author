@@ -1,7 +1,4 @@
 <?php
-use core\event\course_updated;
-
-// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,11 +7,11 @@ use core\event\course_updated;
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * This file contains the definition for the library class for author submission plugin
@@ -29,17 +26,16 @@ defined('MOODLE_INTERNAL') || die();
 
 define('ASSIGNSUBMISSION_ONLINETEXT', 'onlinetext');
 define('ASSIGNSUBMISSIONAUTHOR_MAXAUTHORS', 20);
-/*
- * require_once($CFG->dirroot.'/'.$CFG->admin.'/user/lib.php');
- * require_once($CFG->dirroot.'/'.$CFG->admin.'/user/user_bulk_forms.php'); require_once($CFG->dirroot . '/user/selector/lib.php');
- * require_once($CFG->dirroot . '/course/lib.php'); require_once($CFG->libdir . '/filelib.php');
- */
+
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
+use core\event\course_updated;
 
 /**
- * library class for author submission plugin extending submission plugin base class
+ * Library class for author submission plugin extending submission plugin base class
  *
  * @package assignsubmission_author
+ * @author Rene Roepke
+ * @author Guido Roessling
  * @copyright 2013 Rene Roepke
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -51,8 +47,7 @@ class assign_submission_author extends assign_submission_plugin
      *
      * @return string
      */
-    public function get_name()
-    {
+    public function get_name() {
         return get_string('author', 'assignsubmission_author');
     }
 
@@ -63,42 +58,40 @@ class assign_submission_author extends assign_submission_plugin
      *            The form to add elements to
      * @return void
      */
-    public function get_settings(MoodleQuickForm $mform)
-    {
-        global $CFG, $COURSE;
-        // get config infos
+    public function get_settings(MoodleQuickForm $mform) {
+        // Get config infos.
         $defaultmaxauthors = $this->get_config('maxauthors');
         $defaultgroupsused = $this->get_config('groupsused');
         $defaultingroupsonly = $this->get_config('ingroupsonly');
         $defaultnotification = $this->get_config('notification');
 
-        // generate maxauthors setting
+        // Generate maxauthors setting.
         $options = array();
         for ($i = 1; $i <= ASSIGNSUBMISSIONAUTHOR_MAXAUTHORS; $i++) {
             $options[$i] = $i;
         }
-        // display maxauthors setting
+        // Display maxauthors setting.
         $name = get_string('maxauthors', 'assignsubmission_author');
         $mform->addElement('select', 'assignsubmissionauthor_maxauthors', $name, $options);
         $mform->addHelpButton('assignsubmissionauthor_maxauthors', 'maxauthors', 'assignsubmission_author');
         $mform->setDefault('assignsubmissionauthor_maxauthors', $defaultmaxauthors);
         $mform->disabledIf('assignsubmissionauthor_maxauthors', 'assignsubmission_author_enabled', 'notchecked');
 
-        // display notification setting
+        // Display notification setting.
         $name = get_string('notification', 'assignsubmission_author');
         $mform->addElement('checkbox', 'assignsubmissionauthor_notification', $name, '', 0);
         $mform->setDefault('assignsubmissionauthor_notification', $defaultnotification);
         $mform->addHelpButton('assignsubmissionauthor_notification', 'notification', 'assignsubmission_author');
         $mform->disabledIf('assignsubmissionauthor_notification', 'assignsubmission_author_enabled', 'notchecked');
 
-        // display groupsused setting
+        // Display groupsused setting.
         $name = get_string('groupsused', 'assignsubmission_author');
         $mform->addElement('checkbox', 'assignsubmissionauthor_groupsused', $name, '', 0);
         $mform->setDefault('assignsubmissionauthor_groupsused', $defaultgroupsused);
         $mform->addHelpButton('assignsubmissionauthor_groupsused', 'groupsused', 'assignsubmission_author');
         $mform->disabledIf('assignsubmissionauthor_groupsused', 'assignsubmission_author_enabled', 'notchecked');
 
-        // display ingroupsonly setting
+        // Display ingroupsonly setting.
         $name = get_string('ingroupsonly', 'assignsubmission_author');
         $mform->addElement('checkbox', 'assignsubmissionauthor_ingroupsonly', $name, '', 0);
         $mform->setDefault('assignsubmissionauthor_ingroupsonly', $defaultingroupsonly);
@@ -113,9 +106,8 @@ class assign_submission_author extends assign_submission_plugin
      * @param stdClass $data
      * @return bool
      */
-    public function save_settings(stdClass $data)
-    {
-        // set config info
+    public function save_settings(stdClass $data) {
+        // Set config info.
         $this->set_config('maxauthors', isset($data->assignsubmissionauthor_maxauthors) ? $data->assignsubmissionauthor_maxauthors : 0);
         $this->set_config('ingroupsonly', (isset($data->assignsubmissionauthor_groupsused)
             && $data->assignsubmissionauthor_groupsused == 1) ? (isset($data->assignsubmissionauthor_ingroupsonly) ? $data->assignsubmissionauthor_ingroupsonly : 0) : 0);
@@ -133,33 +125,32 @@ class assign_submission_author extends assign_submission_plugin
      * @param stdClass $data
      * @return true if elements were added to the form
      */
-    public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data)
-    {
+    public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data) {
         global $USER, $CFG, $COURSE;
 
-        // get maxauthors config info
+        // Get maxauthors config info.
         $maxauthors = $this->get_config('maxauthors');
 
-        // if maxauthors <= 1 then return comment and no more content
+        // If maxauthors <= 1 then return comment and no more content.
         if ($maxauthors <= 1) {
             $mform->addElement('static', '', '', get_string('oneauthoronly', 'assignsubmission_author'), 1);
             return true;
         }
 
-        // if team assignment is activated then return comment and no more content
+        // If team assignment is activated then return comment and no more content.
         if ($this->assignment->get_instance()->teamsubmission == 1) {
             $mform->addElement('static', '', '', get_string('noteamsubmission', 'assignsubmission_author'), 1);
             return true;
         }
 
-        // start generating content
+        // Start generating content.
         $courseid = $COURSE->id;
         $userid = $USER->id;
         $selectedauthors = array();
         $alreadyinauthorgroup = false;
         $assignment = $this->assignment->get_instance()->id;
 
-        // if authorsubmission then get it
+        // If authorsubmission then get it.
         if ($submission) {
             $authorsubmission = $this->get_author_submission($assignment, $submission->id);
             if ($authorsubmission) {
@@ -169,15 +160,15 @@ class assign_submission_author extends assign_submission_plugin
             }
         }
 
-        // get ingroupsonly config info
+        // Get ingroupsonly config info.
         $ingroupsonly = $this->get_config('ingroupsonly');
 
-        // get possible coauthors
+        // Get possible coauthors.
         $possiblecoauthors = $this->get_possible_co_authors($courseid, $userid, $ingroupsonly, $assignment);
 
         $userarr[$userid] = '';
 
-        // get author default
+        // Get author default.
         $authordefaultsubmission = $this->get_author_default($userid, $courseid);
 
         if ($authordefaultsubmission) {
@@ -188,10 +179,10 @@ class assign_submission_author extends assign_submission_plugin
             $default = implode(', ', $array);
         }
 
-        // get preselected authors
+        // Get preselected authors.
         $selectedauthors = array_diff_key($selectedauthors, $userarr);
 
-        // set reactive behaviour for all options
+        // Set reactive behaviour for all options.
         $mform->disabledIf('defcoauthors', 'selcoauthors', 'checked');
         $mform->disabledIf('defcoauthors', 'nocoauthors', 'checked');
         $mform->disabledIf('defcoauthors', 'groupcoauthors', 'checked');
@@ -205,38 +196,39 @@ class assign_submission_author extends assign_submission_plugin
         $mform->disabledIf('groupcoauthors', 'selcoauthors', 'checked');
         $mform->disabledIf('groupcoauthors', 'nocoauthors', 'checked');
 
-        // if already in authorgroup then 4th option
+        // If already in authorgroup then 4th option.
         if ($alreadyinauthorgroup) {
             $mform->setDefault('groupcoauthors', 'checked');
             $mform->addElement('checkbox', 'groupcoauthors', '', get_string('choose_group', 'assignsubmission_author'), 1);
-            $mform->addElement('static', 'group2coauthors', get_string('group', 'assignsubmission_author'), $this->get_summary($origauthor, array_diff_key($selectedauthors, $origauthor)), null);
+            $mform->addElement('static', 'group2coauthors', get_string('group', 'assignsubmission_author'),
+                $this->get_summary($origauthor, array_diff_key($selectedauthors, $origauthor)), null);
             $mform->addElement('static', '', '', '');
         } else {
             $mform->setDefault('selcoauthors', 'checked');
         }
 
-        // display 1st option to select co authors
+        // Display 1st option to select co authors.
         $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_coauthors', 'assignsubmission_author'), 1);
 
         if (count($possiblecoauthors) != 0) {
-            // define content of choice boxes
+            // Define content of choice boxes.
             $achoices = array();
             $achoices[0] = get_string('choose', 'assignsubmission_author');
             $achoices = $achoices + $possiblecoauthors;
 
-            // generate as many choice boxes as necessary
+            // Generate as many choice boxes as necessary.
             $objs = array();
             for ($i = 0; $i < $maxauthors - 1; ++$i) {
                 $objs[$i] = &$mform->createElement('select', 'coauthors[' . $i . ']', '', $achoices, null);
             }
 
-            // add elements
+            // Add elements.
             $grp = &$mform->addElement('group', 'coauthorselection', get_string('coauthors', 'assignsubmission_author'), $objs, ' ', false);
             $mform->disabledIf('coauthorselection', 'selcoauthors', 'notchecked');
             $mform->addElement('checkbox', 'asdefault', ' ', get_string('asdefault', 'assignsubmission_author'));
             $mform->disabledIf('asdefault', 'selcoauthors', 'notchecked');
 
-            // set preselected coauthors
+            // Set preselected coauthors.
             if ($alreadyinauthorgroup) {
                 $i = 0;
                 foreach ($selectedauthors as $key => $value) {
@@ -256,14 +248,14 @@ class assign_submission_author extends assign_submission_plugin
 
         $mform->addElement('static', '', '', '');
 
-        // if default then display 2nd option for default
+        // If default then display 2nd option for default.
         if (isset($showdefault) && $showdefault && isset($default)) {
             $mform->addElement('checkbox', 'defcoauthors', '', get_string('choose_defaultcoauthors', 'assignsubmission_author'), 1);
             $mform->addElement('static', 'defaultcoauthors', get_string('defaultcoauthors', 'assignsubmission_author'), $default, 1);
             $mform->addElement('static', '', '', '');
         }
 
-        // display 3rd option for no coauthors
+        // Display 3rd option for no coauthors.
         $mform->addElement('checkbox', 'nocoauthors', '', get_string('choose_nocoauthors', 'assignsubmission_author'), 1);
 
         return true;
@@ -276,8 +268,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param array $possibles
      * @return boolean true if default coauthors can be used
      */
-    private function is_default_usable($defaults, $possibles, $count)
-    {
+    private function is_default_usable($defaults, $possibles, $count) {
         if (count($defaults) > $count - 1)
             return false;
         foreach ($defaults as $author => $value) {
@@ -297,8 +288,7 @@ class assign_submission_author extends assign_submission_plugin
      *            subtype of the plugin
      * @return boolean true if plugin is enabled
      */
-    private function is_plugin_enabled($name, $subtype)
-    {
+    private function is_plugin_enabled($name, $subtype) {
         global $DB;
 
         $rec = $DB->get_record('assign_plugin_config', array(
@@ -321,11 +311,10 @@ class assign_submission_author extends assign_submission_plugin
      * @param int[] $coauthors
      * @param stdClass $data
      */
-    private function set_onlinetext_submission_for_coauthors($coauthors, $data)
-    {
+    private function set_onlinetext_submission_for_coauthors($coauthors, $data) {
         global $DB;
 
-        // imitate behaviour of the onlinetext editor plugin for submission
+        // Imitate behaviour of the onlinetext editor plugin for submission.
         if (isset($data->onlinetext_editor)) {
             $assignment = $this->assignment->get_instance()->id;
             $text = $data->onlinetext_editor['text'];
@@ -359,40 +348,39 @@ class assign_submission_author extends assign_submission_plugin
      * @param stdClass $data
      * @return bool
      */
-    public function save(stdClass $submission, stdClass $data)
-    {
+    public function save(stdClass $submission, stdClass $data) {
         global $USER, $DB, $COURSE;
 
-        // if team submission is activated no submission is possible
+        // If team submission is activated no submission is possible.
         if ($this->assignment->get_instance()->teamsubmission == 1) {
             $this->set_error(get_string('error_teamsubmission', 'assignsubmission_author'));
             return false;
         }
 
-        // get notification config info
+        // Get notification config info.
         $notification = $this->get_config('notification');
 
         $userid = $USER->id;
         $courseid = $COURSE->id;
         $assignment = $this->assignment->get_instance()->id;
 
-        // if already submission then update else create
+        // If already submission then update else create.
         $currentcoauthors = array();
         if ($submission) {
-            // if already author submission then update else create
+            // If already author submission then update else create.
             $authorsubmission = $this->get_author_submission($assignment, $submission->id);
 
             if ($authorsubmission) {
-                // UPDATE AUTHORSUBMISSION
+                // UPDATE AUTHORSUBMISSION.
 
-                // get current coauthors as array
+                // Get current coauthors as array.
                 $currentcoauthors = explode(',', $authorsubmission->authorlist);
 
                 if (isset($data->groupcoauthors) && $data->groupcoauthors == 1) {
-                    // 4th option - coauthor perspective
+                    // Fourth (4th) option - coauthor perspective.
                     $currentcoauthors = explode(',', $authorsubmission->author . ',' . $authorsubmission->authorlist);
 
-                    // update onlinetext submission
+                    // Update onlinetext submission.
                     if ($this->is_plugin_enabled(ASSIGNSUBMISSION_ONLINETEXT, 'assignsubmission')) {
                         $this->set_onlinetext_submission_for_coauthors($currentcoauthors, $data);
                     }
@@ -400,12 +388,12 @@ class assign_submission_author extends assign_submission_plugin
                     return true;
                 } else if ($authorsubmission->author == $userid) {
                     if (isset($data->selcoauthors) && $data->selcoauthors == 1) {
-                        // 1st option - author perspective
+                        // First (1st) option - author perspective.
 
-                        // get new selected coauthors
+                        // Get new selected coauthors.
                         $selectedcoauthors = $this->get_selected_coauthors($data);
 
-                        // if no new selected coauthors then delete current authorgroup else just update
+                        // If no new selected coauthors then delete current authorgroup else just update.
                         if (count($selectedcoauthors) == 0) {
                             $deletecoauthors = $currentcoauthors;
 
@@ -414,36 +402,36 @@ class assign_submission_author extends assign_submission_plugin
                             $this->delete_author_submission($userid, $submission->assignment);
                         } else {
 
-                            // distinguish between new coauthors, deleted coauthors, current coauthors
+                            // Distinguish between new coauthors, deleted coauthors, current coauthors.
                             $deletecoauthors = array_diff($currentcoauthors, $selectedcoauthors);
                             $newcoauthors = array_diff($selectedcoauthors, $currentcoauthors);
                             $updatecoauthors = array_diff($selectedcoauthors, $newcoauthors);
                             $currentcoauthors = $selectedcoauthors;
 
-                            // delete author group with deleted coauthors
+                            // Delete author group with deleted coauthors.
                             $this->delete_author_group($deletecoauthors, $submission->assignment);
 
                             $author = $authorsubmission->author;
                             $authorlist = implode(',', $currentcoauthors);
 
-                            // create and update author group with new and current coauthors
+                            // Create and update author group with new and current coauthors.
                             $this->create_author_group($newcoauthors, $submission, $authorlist);
                             $this->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist);
 
-                            // update own author submission
+                            // Update own author submission
                             $this->update_author_submission($authorsubmission, $author, $authorlist);
 
-                            // if onlinetext plugin is enabled then update/create submissions
+                            // If onlinetext plugin is enabled then update/create submissions.
                             if ($this->is_plugin_enabled(ASSIGNSUBMISSION_ONLINETEXT, 'assignsubmission')) {
                                 $this->set_onlinetext_submission_for_coauthors($currentcoauthors, $data);
                             }
 
-                            // if default option is set then save this group as default group
+                            // If default option is set then save this group as default group.
                             if (isset($data->asdefault) && $data->asdefault == 1) {
                                 $this->set_author_default($authorlist, $userid, $courseid);
                             }
 
-                            // if notifications are on then send notifications to all new and currend coauthors
+                            // If notifications are on then send notifications to all new and currend coauthors.
                             if ($notification) {
                                 $this->send_notifications($author, $currentcoauthors);
                             }
@@ -451,48 +439,48 @@ class assign_submission_author extends assign_submission_plugin
 
                         return true;
                     } else if (isset($data->defcoauthors) && $data->defcoauthors == 1) {
-                        // 2nd option - author perspective
+                        // Second (2nd) option - author perspective.
 
-                        // get default coauthors
+                        // Get default coauthors.
                         $defaultcoauthors = $this->get_default_coauthors($userid, $courseid);
 
-                        // distinguish between new coauthors, deleted coauthors, current coauthors
+                        // Distinguish between new coauthors, deleted coauthors, current coauthors.
                         $deletecoauthors = array_diff($currentcoauthors, $defaultcoauthors);
                         $newcoauthors = array_diff($defaultcoauthors, $currentcoauthors);
                         $updatecoauthors = array_diff($defaultcoauthors, $newcoauthors);
 
                         $currentcoauthors = $defaultcoauthors;
 
-                        // delete author group with deleted coauthors
+                        // Delete author group with deleted coauthors.
                         $this->delete_author_group($deletecoauthors, $submission->assignment);
 
                         $author = $authorsubmission->author;
                         $authorlist = implode(',', $currentcoauthors);
 
-                        // create and update author group with new and current coauthors
+                        // Create and update author group with new and current coauthors.
                         $this->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist);
                         $this->create_author_group($newcoauthors, $submission, $authorlist);
 
-                        // update own author submission
+                        // Update own author submission
                         $this->update_author_submission($authorsubmission, $author, $authorlist);
 
-                        // if onlinetext plugin is enabled then update/create submissions
+                        // If onlinetext plugin is enabled then update/create submissions.
                         if ($this->is_plugin_enabled(ASSIGNSUBMISSION_ONLINETEXT, 'assignsubmission')) {
                             $this->set_onlinetext_submission_for_coauthors($currentcoauthors, $data);
                         }
 
-                        // if notifications are on then send notifications to all new and currend coauthors
+                        // If notifications are on then send notifications to all new and currend coauthors.
                         if ($notification) {
                             $this->send_notifications($author, $currentcoauthors);
                         }
 
                         return true;
                     } else if (isset($data->nocoauthors) && $data->nocoauthors == 1) {
-                        // 3rd option - author perspective
+                        // Third (3rd) option - author perspective.
 
                         $deletecoauthors = $currentcoauthors;
 
-                        // delete authorgroup
+                        // Delete authorgroup.
                         $this->delete_author_group($deletecoauthors, $submission->assignment);
 
                         $this->delete_author_submission($userid, $submission->assignment);
@@ -500,7 +488,7 @@ class assign_submission_author extends assign_submission_plugin
                     }
                 } else {
                     if (isset($data->selcoauthors) && $data->selcoauthors == 1) {
-                        // 1st option - coauthor perspective
+                        // First (1st) option - coauthor perspective.
                         $userarr = array(
                             $userid
                         );
@@ -514,7 +502,7 @@ class assign_submission_author extends assign_submission_plugin
                         $author = $authorsubmission->author;
                         $authorlist = implode(',', $updatecoauthors);
 
-                        // update or delete remaining author group
+                        // Update or delete remaining author group.
                         if ($authorlist != '') {
                             $this->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist);
                             $this->update_author_group($updateauthor, $submission->assignment, $author, $authorlist);
@@ -524,7 +512,7 @@ class assign_submission_author extends assign_submission_plugin
                         }
                         $selectedcoauthors = $this->get_selected_coauthors($data);
 
-                        // delete author group and submission
+                        // Delete author group and submission.
                         if (count($selectedcoauthors) == 0) {
 
                             $deletecoauthors = $currentcoauthors;
@@ -537,31 +525,31 @@ class assign_submission_author extends assign_submission_plugin
                         $author = $userid;
                         $authorlist = implode(',', $selectedcoauthors);
 
-                        // create new author group
+                        // Create new author group.
                         $this->create_author_group($selectedcoauthors, $submission, $authorlist);
 
                         $currentcoauthors = $selectedcoauthors;
 
-                        // update own author submission
+                        // Update own author submission.
                         $this->update_author_submission($authorsubmission, $author, $authorlist);
 
-                        // if onlinetext plugin is enabled then update/create submissions
+                        // If onlinetext plugin is enabled then update/create submissions.
                         if ($this->is_plugin_enabled(ASSIGNSUBMISSION_ONLINETEXT, 'assignsubmission')) {
                             $this->set_onlinetext_submission_for_coauthors($currentcoauthors, $data);
                         }
 
-                        // if notifications are on then send notifications to all new and currend coauthors
+                        // If notifications are on then send notifications to all new and currend coauthors.
                         if ($notification) {
                             $this->send_notifications($author, $currentcoauthors);
                         }
 
-                        // if default option is set then save this group as default group
+                        // If default option is set then save this group as default group.
                         if (isset($data->asdefault) && $data->asdefault == 1) {
                             $this->set_author_default($authorlist, $userid, $courseid);
                         }
                         return true;
                     } else if (isset($data->defcoauthors) && $data->defcoauthors == 1) {
-                        // 2nd option - coauthor perspective
+                        // Second (2nd) option - coauthor perspective.
 
                         $userarr = array(
                             $userid
@@ -576,7 +564,7 @@ class assign_submission_author extends assign_submission_plugin
                         $author = $authorsubmission->author;
                         $authorlist = implode(',', $updatecoauthors);
 
-                        // update or delete remaining authorgroup
+                        // Update or delete remaining authorgroup.
                         if ($authorlist != '') {
                             $this->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist);
                             $this->update_author_group($updateauthor, $submission->assignment, $author, $authorlist);
@@ -585,32 +573,32 @@ class assign_submission_author extends assign_submission_plugin
                             $this->delete_author_group($updateauthor, $submission->assignment);
                         }
 
-                        // get default coauthors
+                        // Get default coauthors.
                         $defaultcoauthors = $this->get_default_coauthors($userid, $courseid);
 
                         $author = $userid;
                         $authorlist = implode(',', $defaultcoauthors);
 
-                        // create new authorgroup by default
+                        // Create new authorgroup by default.
                         $this->create_author_group($defaultcoauthors, $submission, $authorlist);
 
                         $currentcoauthors = $defaultcoauthors;
 
-                        // update own authorsubmission
+                        // Update own authorsubmission.
                         $this->update_author_submission($authorsubmission, $author, $authorlist);
 
-                        // if onlinetext plugin is enabled then update/create submissions
+                        // If onlinetext plugin is enabled then update/create submissions.
                         if ($this->is_plugin_enabled(ASSIGNSUBMISSION_ONLINETEXT, 'assignsubmission')) {
                             $this->set_onlinetext_submission_for_coauthors($currentcoauthors, $data);
                         }
 
-                        // if notifications are on then send notifications to all new and currend coauthors
+                        // If notifications are on then send notifications to all new and currend coauthors.
                         if ($notification) {
                             $this->send_notifications($author, $currentcoauthors);
                         }
                         return true;
                     } else if (isset($data->nocoauthors) && $data->nocoauthors == 1) {
-                        // 3rd option - coauthor perspective
+                        // Third (3rd) option - coauthor perspective.
 
                         $userarr = array(
                             $userid
@@ -625,11 +613,11 @@ class assign_submission_author extends assign_submission_plugin
                         $author = $authorsubmission->author;
                         $authorlist = implode(',', $updatecoauthors);
 
-                        // update current author group
+                        // Update current author group.
                         $this->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist);
                         $this->update_author_group($updateauthor, $submission->assignment, $author, $authorlist);
 
-                        // delete own author submission
+                        // Delete own author submission.
                         $this->delete_author_submission($userid, $submission->assignment);
 
                         return true;
@@ -640,7 +628,7 @@ class assign_submission_author extends assign_submission_plugin
 
                 if (isset($data->selcoauthors) && $data->selcoauthors == 1) {
 
-                    // get new coauthors
+                    // Get new coauthors.
                     $currentcoauthors = $this->get_selected_coauthors($data);
 
                     if (count($currentcoauthors) == 0) {
@@ -650,51 +638,51 @@ class assign_submission_author extends assign_submission_plugin
                     $author = $userid;
                     $authorlist = implode(',', $currentcoauthors);
 
-                    // create new authorgroup
+                    // Create new authorgroup.
                     $this->create_author_group($currentcoauthors, $submission, $authorlist);
                     $this->create_author_submission($submission->assignment, $submission->id, $author, $authorlist);
 
-                    // if onlinetext plugin is enabled then update/create submissions
+                    // If onlinetext plugin is enabled then update/create submissions.
                     if ($this->is_plugin_enabled(ASSIGNSUBMISSION_ONLINETEXT, 'assignsubmission')) {
                         $this->set_onlinetext_submission_for_coauthors($currentcoauthors, $data);
                     }
 
-                    // if notifications are on then send notifications to all new and currend coauthors
+                    // If notifications are on then send notifications to all new and currend coauthors.
                     if ($notification) {
                         $this->send_notifications($author, $currentcoauthors);
                     }
 
-                    // if default option is set then save this group as default group
+                    // If default option is set then save this group as default group.
                     if (isset($data->asdefault) && $data->asdefault == 1) {
                         $this->set_author_default($authorlist, $userid, $courseid);
                     }
                     return true;
 
                 } else if (isset($data->defcoauthors) && $data->defcoauthors == 1) {
-                    // 2nd option - new authorgroup like the default group
+                    // Second (2nd) option - new authorgroup like the default group.
 
                     $currentcoauthors = $this->get_default_coauthors($userid, $courseid);
 
                     $author = $userid;
                     $authorlist = implode(',', $currentcoauthors);
 
-                    // create new authorgroup
+                    // Create new authorgroup.
                     $this->create_author_group($currentcoauthors, $submission, $authorlist);
                     $this->create_author_submission($submission->assignment, $submission->id, $author, $authorlist);
 
-                    // if onlinetext plugin is enabled then update/create submissions
+                    // If onlinetext plugin is enabled then update/create submissions.
                     if ($this->is_plugin_enabled(ASSIGNSUBMISSION_ONLINETEXT, 'assignsubmission')) {
                         $this->set_onlinetext_submission_for_coauthors($currentcoauthors, $data);
                     }
 
-                    // if notifications are on then send notifications to all new and currend coauthors
+                    // If notifications are on then send notifications to all new and currend coauthors.
                     if ($notification) {
                         $this->send_notifications($author, $currentcoauthors);
                     }
 
                     return true;
                 } else if (isset($data->nocoauthors) && $data->nocoauthors == 1) {
-                    // no coauthors, so nothing to create
+                    // No coauthors, so nothing to create.
                     return true;
                 }
             }
@@ -709,8 +697,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param int $author
      * @param int[] $coauthors
      */
-    private function send_notifications($author, $coauthors)
-    {
+    private function send_notifications($author, $coauthors) {
         global $CFG, $USER;
         $user = core_user::get_user($author);
         $course = $this->assignment->get_course();
@@ -718,7 +705,8 @@ class assign_submission_author extends assign_submission_plugin
         $a->courseurl = $CFG->wwwroot . '/course/view.php?id=' . $course->id;
         $a->coursename = $course->fullname;
         $a->username = fullname(core_user::get_user($author));
-        $a->assignmentname = format_string($this->assignment->get_instance()->name, true, array('context' => $this->assignment->get_context()));
+        $a->assignmentname = format_string($this->assignment->get_instance()->name, true,
+            array('context' => $this->assignment->get_context()));
         $a->assignmenturl = $CFG->wwwroot . '/mod/assign/view.php?id=' . $this->assignment->get_course_module()->id;
         $subject = get_string('subject', 'assignsubmission_author', $a);
         $message = $subject . ': ' . get_string('message', 'assignsubmission_author', $a);
@@ -742,19 +730,19 @@ class assign_submission_author extends assign_submission_plugin
             ));
             message_send($eventdata);
             $eventdata = new stdClass();
-            $eventdata->modulename       = 'assign';
-            $eventdata->userfrom         = $USER;
-            $eventdata->userto           = $userto;
-            $eventdata->subject          = $subject;
-            $eventdata->fullmessage      = $message;
+            $eventdata->modulename = 'assign';
+            $eventdata->userfrom = $USER;
+            $eventdata->userto = $userto;
+            $eventdata->subject = $subject;
+            $eventdata->fullmessage = $message;
             $eventdata->fullmessageformat = FORMAT_PLAIN;
-            $eventdata->fullmessagehtml  = $message;
-            $eventdata->smallmessage     = $subject;
+            $eventdata->fullmessagehtml = $message;
+            $eventdata->smallmessage = $subject;
 
-            $eventdata->name            = 'assign_notification';
-            $eventdata->component       = 'mod_assign';
-            $eventdata->notification    = 1;
-            $eventdata->contexturl      = $CFG->wwwroot . '/mod/assign/view.php?id=' . $this->assignment->get_course_module()->id;
+            $eventdata->name = 'assign_notification';
+            $eventdata->component = 'mod_assign';
+            $eventdata->notification = 1;
+            $eventdata->contexturl = $CFG->wwwroot . '/mod/assign/view.php?id=' . $this->assignment->get_course_module()->id;
             $eventdata->contexturlname = format_string($this->assignment->get_instance()->name, true, array(
                 'context' => $this->assignment->get_context()
             ));
@@ -770,8 +758,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param int $submission
      * @return Ambigous <mixed, stdClass, false, boolean>
      */
-    private function get_author_submission($assignment, $submission)
-    {
+    private function get_author_submission($assignment, $submission) {
         global $DB;
         return $DB->get_record('assignsubmission_author', array(
             'assignment' => $assignment,
@@ -786,8 +773,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param int $course
      * @return Ambigous <mixed, stdClass, false, boolean>
      */
-    private function get_author_default($user, $course)
-    {
+    private function get_author_default($user, $course) {
         global $DB;
         return $DB->get_record('assign_author_default', array(
             'user' => $user,
@@ -802,8 +788,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param int $courseid
      * @return int[] ids of coauthors
      */
-    private function get_default_coauthors($userid, $courseid)
-    {
+    private function get_default_coauthors($userid, $courseid) {
         global $DB;
         $rec = $this->get_author_default($userid, $courseid);
         return explode(',', $rec->coauthors);
@@ -815,8 +800,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param string $ids
      * @return array
      */
-    private function get_author_array($ids, $link = false)
-    {
+    private function get_author_array($ids, $link = false) {
         global $DB, $CFG;
         if ($ids != '') {
             $ids2 = explode(',', $ids);
@@ -847,36 +831,37 @@ class assign_submission_author extends assign_submission_plugin
      * @param int $assignment
      * @return array:
      */
-    private function get_possible_co_authors($courseid, $userid, $ingroupsonly, $assignment)
-    {
+    private function get_possible_co_authors($courseid, $userid, $ingroupsonly, $assignment) {
         global $DB;
-        // get config info about groups
+        // Get config info about groups.
         $groupsused = $this->get_config('groupsused');
 
         if ($groupsused) {
 
-            // get right groups -> all or user-specific ones
+            // Get right groups -> all or user-specific ones.
             if ($ingroupsonly) {
                 $groups = groups_get_all_groups($courseid, $userid);
             } else {
                 $groups = groups_get_all_groups($courseid);
             }
 
-            // get all members of the groups
+            // Get all members of the groups.
             $members = array();
             foreach ($groups as $a) {
                 $members = $members + groups_get_members($a->id);
             }
 
-            // get a record set of all enrolled 'students' (roleid = 5)
-            $query = 'select u.id as id, firstname, lastname, picture, imagealt, email from {role_assignments} as a, {user} as u where contextid=' . $this->assignment->get_course_context()->id . ' and roleid=5 and a.userid=u.id;';
+            // Get a record set of all enrolled 'students' (roleid = 5).
+            $queryfields = 'u.id as id, firstname, lastname, picture, imagealt, email';
+            $query = 'select ' . $queryfields . ' from {role_assignments} as a, {user} as u where contextid=' .
+                $this->assignment->get_course_context()->id . ' and roleid=5 and a.userid=u.id;';
             $rs = $DB->get_recordset_sql($query);
             $students = array();
             foreach ($rs as $r) {
                 $students[$r->id] = '';
             }
 
-            // collect coauthors
+            // Collect coauthors.
             $coauthors = array();
             $seen = array();
             foreach ($members as $r) {
@@ -896,24 +881,24 @@ class assign_submission_author extends assign_submission_plugin
                 }
             }
 
-            // user is no group -> return empty array
+            // User is no group -> return empty array.
             if (!array_key_exists($userid, $seen)) {
                 return array();
             }
         } else {
 
-            // get all enrolled users
+            // Get all enrolled users.
             $enroltypes = $DB->get_records('enrol', array(
                 'courseid' => $courseid
             ));
             $users = array();
             foreach ($enroltypes as $type) {
-                $enrolled_users = $DB->get_records('user_enrolments', array(
+                $enrolledusers = $DB->get_records('user_enrolments', array(
                     'enrolid' => $type->id
                 ));
-                foreach ($enrolled_users as $enrolled_user) {
+                foreach ($enrolledusers as $enrolleduser) {
                     $user = $DB->get_record('user', array(
-                        'id' => $enrolled_user->userid
+                        'id' => $enrolleduser->userid
                     ));
                     array_push($users, $user);
                 }
@@ -921,15 +906,17 @@ class assign_submission_author extends assign_submission_plugin
 
             $records = $users;
 
-            // get a record set of all enrolled 'students' (roleid = 5)
-            $query = 'select u.id as id, firstname, lastname, picture, imagealt, email from mdl_role_assignments as a, mdl_user as u where contextid=' . $this->assignment->get_course_context()->id . ' and roleid=5 and a.userid=u.id;';
+            // Get a record set of all enrolled 'students' (roleid = 5).
+            $queryfields = 'u.id as id, firstname, lastname, picture, imagealt, email';
+            $query = 'select ' . $queryfields . ' from mdl_role_assignments as a, mdl_user as u where contextid=' .
+                $this->assignment->get_course_context()->id . ' and roleid=5 and a.userid=u.id;';
             $rs = $DB->get_recordset_sql($query);
             $students = array();
             foreach ($rs as $r) {
                 $students[$r->id] = '';
             }
 
-            // collect coauthors
+            // Collect coauthors.
             $coauthors = array();
             foreach ($records as $r) {
                 if (array_key_exists($r->id, $students)) {
@@ -948,11 +935,12 @@ class assign_submission_author extends assign_submission_plugin
                 }
             }
         }
-        // remove user
+
+        // Remove user.
         $userarr[$userid] = '';
         $coauthors = array_diff_key($coauthors, $userarr);
 
-        // sorting coauthors
+        // Sorting coauthors.
         asort($coauthors);
 
         return $coauthors;
@@ -965,8 +953,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param int $assignment
      * @return Ambigous <mixed, stdClass, false, boolean>
      */
-    private function get_submission($userid, $assignment)
-    {
+    private function get_submission($userid, $assignment) {
         global $DB;
         return $DB->get_record('assign_submission', array(
             'userid' => $userid,
@@ -980,8 +967,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param stdClass $data
      * @return int[] selected coauthor ids
      */
-    private function get_selected_coauthors($data)
-    {
+    private function get_selected_coauthors($data) {
         $coauthors = array();
         if (isset($data->coauthors)) {
             $selected = array_unique($data->coauthors);
@@ -1003,8 +989,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param int $courseid
      * @return boolean
      */
-    private function set_author_default($coauthors, $userid, $courseid)
-    {
+    private function set_author_default($coauthors, $userid, $courseid) {
         global $DB;
         $authordefaultsubmission = $DB->get_record('assign_author_default', array(
             'user' => $userid,
@@ -1029,8 +1014,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param stdClass $submission
      * @return Ambigous <boolean, number>
      */
-    private function create_submission($userid, $submission)
-    {
+    private function create_submission($userid, $submission) {
         global $DB;
         $newsubmission = new stdClass();
         $newsubmission->assignment = $submission->assignment;
@@ -1051,12 +1035,10 @@ class assign_submission_author extends assign_submission_plugin
      * @param stdClass $submission
      * @param string $authorlist
      */
-    private function create_author_group($coauthors, $submission, $authorlist)
-    {
+    private function create_author_group($coauthors, $submission, $authorlist) {
         global $DB, $CFG;
         $assignment = $submission->assignment;
         $author = $submission->userid;
-        // var_dump($assignment);
         foreach ($coauthors as $key => $coauthor) {
 
             $coauthorsubmission = $this->get_submission($coauthor, $assignment);
@@ -1066,7 +1048,6 @@ class assign_submission_author extends assign_submission_plugin
                 $this->create_submission($coauthor, $submission);
                 require_once($CFG->dirroot . '/mod/assign/lib.php');
                 $assign = clone $this->assignment->get_instance();
-                // var_dump($assign);
                 $assign->cmidnumber = $this->assignment->get_course_module()->idnumber;
                 assign_update_grades($assign, $coauthor);
                 $coauthorsubmission = $this->get_submission($coauthor, $assignment);
@@ -1088,8 +1069,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param string $authorlist
      * @return boolean
      */
-    private function create_author_submission($assignment, $submission, $author, $authorlist)
-    {
+    private function create_author_submission($assignment, $submission, $author, $authorlist) {
         global $DB;
         $authorsubmission = new stdClass();
         $authorsubmission->assignment = $assignment;
@@ -1107,8 +1087,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param int $author
      * @param string $authorlist
      */
-    private function update_author_group($coauthors, $assignment, $author, $authorlist)
-    {
+    private function update_author_group($coauthors, $assignment, $author, $authorlist) {
         global $DB;
         foreach ($coauthors as $coauthor) {
             $coauthorsubmission = $this->get_submission($coauthor, $assignment);
@@ -1132,8 +1111,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param string $authorlist
      * @return boolean
      */
-    private function update_author_submission($authorsubmission, $author, $authorlist)
-    {
+    private function update_author_submission($authorsubmission, $author, $authorlist) {
         global $DB;
         $authorsubmission->author = $author;
         $authorsubmission->authorlist = $authorlist;
@@ -1145,8 +1123,7 @@ class assign_submission_author extends assign_submission_plugin
      *
      * @param int $id
      */
-    private function delete_submission($id)
-    {
+    private function delete_submission($id) {
         global $DB;
         return $DB->delete_record('assign_submission', array(
             'id' => $id
@@ -1159,8 +1136,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param int[] $coauthors
      * @param int $assignment
      */
-    private function delete_author_group($coauthors, $assignment)
-    {
+    private function delete_author_group($coauthors, $assignment) {
         foreach ($coauthors as $coauthor) {
             $this->delete_author_submission($coauthor, $assignment);
         }
@@ -1173,8 +1149,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param unknown $assignment
      * @return boolean
      */
-    private function delete_author_submission($userid, $assignment)
-    {
+    private function delete_author_submission($userid, $assignment) {
         global $DB;
         $submission = $this->get_submission($userid, $assignment);
         return $DB->delete_records('assignsubmission_author', array(
@@ -1190,8 +1165,7 @@ class assign_submission_author extends assign_submission_plugin
      *            - If the summary has been truncated set this to true
      * @return string
      */
-    public function view_summary(stdClass $submission, & $showviewlink)
-    {
+    public function view_summary(stdClass $submission, & $showviewlink) {
         global $CFG, $USER;
         $assignment = $this->assignment->get_instance()->id;
         $authorsubmission = $this->get_author_submission($assignment, $submission->id);
@@ -1213,8 +1187,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param unknown $author
      * @param unknown $coauthors
      */
-    public function get_summary($author, $coauthors)
-    {
+    public function get_summary($author, $coauthors) {
         $summary = get_string('summary_author', 'assignsubmission_author');
         $summary .= ': ';
         $summary .= implode(',', $author);
@@ -1231,8 +1204,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param stdClass $submission
      * @return string
      */
-    public function view(stdClass $submission)
-    {
+    public function view(stdClass $submission) {
         $showviewlink = true;
         return $this->view_summary($submission, $showviewlink);
     }
@@ -1244,8 +1216,7 @@ class assign_submission_author extends assign_submission_plugin
      *            The new submission
      * @return string
      */
-    public function format_for_log(stdClass $submission)
-    {
+    public function format_for_log(stdClass $submission) {
         // Format the info for each submission plugin (will be logged).
         $authorsubmission = $this->get_author_submission($this->assignment->get_instance()->id, $submission->id);
         $authorloginfo = '';
@@ -1262,8 +1233,7 @@ class assign_submission_author extends assign_submission_plugin
      *
      * @return bool
      */
-    public function delete_instance()
-    {
+    public function delete_instance() {
         global $DB;
         $DB->delete_records('assignsubmission_author', array(
             'assignment' => $this->assignment->get_instance()->id
@@ -1278,8 +1248,7 @@ class assign_submission_author extends assign_submission_plugin
      * @param stdClass $submission
      * @return bool
      */
-    public function is_empty(stdClass $submission)
-    {
+    public function is_empty(stdClass $submission) {
         return ($this->get_author_submission($this->assignment->get_instance()->id, $submission->id) == false);
     }
 }

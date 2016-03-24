@@ -17,7 +17,9 @@
 /**
  * Capability definitions for this module.
  *
- * @package   assignsubmission_author
+ * @package assignsubmission_author
+ * @author Rene Roepke
+ * @author Guido Roessling
  * @copyright 2013 Rene Roepke
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

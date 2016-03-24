@@ -18,6 +18,8 @@
  * Post-install code for the submission_author module.
  *
  * @package assignsubmission_author
+ * @author Rene Roepke
+ * @author Guido Roessling
  * @copyright 2013 Rene Roepke
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -38,7 +40,7 @@ function xmldb_assignsubmission_author_install() {
 
     $pluginmanager->move_plugin('author', 'down');
     $pluginmanager->move_plugin('author', 'down');
-	$pluginmanager->move_plugin('author', 'down');
+    $pluginmanager->move_plugin('author', 'down');
 
     return true;
 }
