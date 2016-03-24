@@ -119,7 +119,7 @@ class assign_submission_author extends assign_submission_plugin
         $checknotification = isset($data->assignsubmissionauthor_notification);
         $this->set_config('notification',
             $checknotification ? $data->assignsubmissionauthor_notification : 0);
-        $checkgroupsused =  isset($data->assignsubmissionauthor_groupsused);
+        $checkgroupsused = isset($data->assignsubmissionauthor_groupsused);
         $this->set_config('groupsused',
             $checkgroupsused ? $data->assignsubmissionauthor_groupsused : 0);
         return true;
@@ -135,7 +135,7 @@ class assign_submission_author extends assign_submission_plugin
      * @return true if elements were added to the form
      */
     public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data) {
-        global $USER, $CFG, $COURSE;
+        global $USER, $COURSE;
 
         // Get maxauthors config info.
         $maxauthors = $this->get_config('maxauthors');
@@ -232,7 +232,7 @@ class assign_submission_author extends assign_submission_plugin
             }
 
             // Add elements.
-            $grp = &$mform->addElement('group', 'coauthorselection',
+            $mform->addElement('group', 'coauthorselection',
                 get_string('coauthors', 'assignsubmission_author'), $objs, ' ', false);
             $mform->disabledIf('coauthorselection', 'selcoauthors', 'notchecked');
             $mform->addElement('checkbox', 'asdefault', ' ', get_string('asdefault', 'assignsubmission_author'));
@@ -284,7 +284,7 @@ class assign_submission_author extends assign_submission_plugin
         if (count($defaults) > $count - 1) {
             return false;
         }
-        foreach ($defaults as $author => $value) {
+        foreach (array_keys($defaults) as $author) {
             if (!array_key_exists($author, $possibles)) {
                 return false;
             }
@@ -362,7 +362,7 @@ class assign_submission_author extends assign_submission_plugin
      * @return bool
      */
     public function save(stdClass $submission, stdClass $data) {
-        global $USER, $DB, $COURSE;
+        global $USER, $COURSE;
 
         // If team submission is activated no submission is possible.
         if ($this->assignment->get_instance()->teamsubmission == 1) {
@@ -712,7 +712,6 @@ class assign_submission_author extends assign_submission_plugin
      */
     private function send_notifications($author, $coauthors) {
         global $CFG, $USER;
-        $user = core_user::get_user($author);
         $course = $this->assignment->get_course();
         $a = new stdClass();
         $a->courseurl = $CFG->wwwroot . '/course/view.php?id=' . $course->id;
@@ -802,7 +801,6 @@ class assign_submission_author extends assign_submission_plugin
      * @return int[] ids of coauthors
      */
     private function get_default_coauthors($userid, $courseid) {
-        global $DB;
         $rec = $this->get_author_default($userid, $courseid);
         return explode(',', $rec->coauthors);
     }
@@ -1004,19 +1002,19 @@ class assign_submission_author extends assign_submission_plugin
      */
     private function set_author_default($coauthors, $userid, $courseid) {
         global $DB;
-        $authordefaultsubmission = $DB->get_record('assign_author_default', array(
+        $authordefault = $DB->get_record('assign_author_default', array(
             'user' => $userid,
             'course' => $courseid
         ));
-        if ($authordefaultsubmission) {
-            $authordefaultsubmission->coauthors = $coauthors;
-            return $DB->update_record('assign_author_default', $authordefaultsubmission, false);
+        if ($authordefault) {
+            $authordefault->coauthors = $coauthors;
+            return $DB->update_record('assign_author_default', $authordefault, false);
         } else {
-            $authordefaultsubmission = new stdClass();
-            $authordefaultsubmission->coauthors = $coauthors;
-            $authordefaultsubmission->course = $courseid;
-            $authordefaultsubmission->user = $userid;
-            return $DB->insert_record('assign_author_default', $authordefaultsubmission, false) > 0;
+            $authordefault = new stdClass();
+            $authordefault->coauthors = $coauthors;
+            $authordefault->course = $courseid;
+            $authordefault->user = $userid;
+            return $DB->insert_record('assign_author_default', $authordefault, false) > 0;
         }
     }
 
@@ -1179,7 +1177,6 @@ class assign_submission_author extends assign_submission_plugin
      * @return string
      */
     public function view_summary(stdClass $submission, & $showviewlink) {
-        global $CFG, $USER;
         $assignment = $this->assignment->get_instance()->id;
         $authorsubmission = $this->get_author_submission($assignment, $submission->id);
         // Always show the view link.

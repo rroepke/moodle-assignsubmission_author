@@ -26,10 +26,12 @@
 
 /**
  * Stub for upgrade code
+ *
  * @param int $oldversion
  * @return bool
  */
 function xmldb_assignsubmission_author_upgrade($oldversion) {
+
     return true;
 }
 
