@@ -52,6 +52,9 @@ class utilities {
 
         return false;
     }
+    /*
+     * Notice: Trying to get property 'id' of non-object in /vagrant/wwwmoodle/mod/assign/submission/author/classes/utilities.php on line 73
+     */
 
     /**
      * Get the author ids and names as an array
@@ -69,11 +72,14 @@ class utilities {
                 $userrec = $DB->get_record('user', array(
                         'id' => $id
                 ));
-                if ($link) {
-                    $url = $CFG->wwwroot . '/user/view.php?id=' . $userrec->id . '&course=' . $assignmentid;
-                    $selectedauthors[$userrec->id] = "<a href='" . $url . "'>" . fullname($userrec) . "</a>";
-                } else {
-                    $selectedauthors[$userrec->id] = fullname($userrec);
+                $userrec = get_complete_user_data('id', $id);
+                if ($userrec) {
+                    if ($link) {
+                        $url = $CFG->wwwroot . '/user/view.php?id=' . $userrec->id . '&course=' . $assignmentid;
+                        $selectedauthors[$userrec->id] = "<a href='" . $url . "'>" . fullname($userrec) . "</a>";
+                    } else {
+                        $selectedauthors[$userrec->id] = fullname($userrec);
+                    }
                 }
             }
             return $selectedauthors;
