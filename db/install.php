@@ -25,7 +25,6 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-
 /**
  * Code run after the assignsubmission_author module database tables have been created.
  * Moves the plugin to the top of the list (of 3)

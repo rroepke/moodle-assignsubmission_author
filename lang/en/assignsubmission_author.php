@@ -62,3 +62,5 @@ $string['pluginname'] = 'Author groups submission';
 $string['nopossiblecoauthors'] = 'You cannot choose co-authors because you are not in a group. Please contact the course manager.';
 
 $string['error_teamsubmission'] = 'You cannot submit a solution. <br><br>The submission type "Author groups" cannot be used with the group submission settings. Please contact the course manager if you have any questions.';
+
+$string['header'] = 'Selection of Co-Authors';

@@ -61,3 +61,4 @@ $string['pluginname'] = 'Abgabe als Autorengruppen';
 $string['nopossiblecoauthors'] = 'Sie können keine Co-Autoren auswählen, da sie keiner Gruppe angehören. Bitte kontaktieren Sie den Veranstalter des Kurses.';
 
 $string['error_teamsubmission'] = 'Es kann keine Lösung eingereicht werden. <br><br>Der Abgabetyp "Autorengruppen" kann nicht gemeinsam mit der Einstellung für Gruppeneinreichungen genutzt werden. Bitte kontaktieren Sie bei weiteren Fragen den Veranstalter des Kurses.';
+$string['header'] = 'Co-Autoren-Auswahl';
