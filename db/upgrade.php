@@ -30,8 +30,26 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @param int $oldversion
  * @return bool
+ * @throws ddl_exception
+ * @throws ddl_table_missing_exception
+ * @throws downgrade_exception
+ * @throws upgrade_exception
  */
 function xmldb_assignsubmission_author_upgrade($oldversion) {
+    global $DB;
+    $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
+
+    if ($oldversion < 2018072101) {
+
+        // Define table assignsubmission_author_def to be renamed to assignsubmission_author_def.
+        $table = new xmldb_table('assign_author_default');
+
+        // Launch rename table for assignsubmission_author_def.
+        $dbman->rename_table($table, 'assignsubmission_author_def');
+
+        // Author savepoint reached.
+        upgrade_plugin_savepoint(true, 2018072101, 'assignsubmission', 'author');
+    }
 
     return true;
 }

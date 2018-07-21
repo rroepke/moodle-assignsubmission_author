@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/assign/submission/author/db" VERSION="20120423" COMMENT="XMLDB file for Moodle mod/assign/submission/author"
+<XMLDB PATH="mod/assign/submission/author/db" VERSION="20180721" COMMENT="XMLDB file for Moodle mod/assign/submission/author"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
 >
@@ -9,7 +9,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="assignment" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="submission" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-		<FIELD NAME="author" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="author" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="authorlist" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The authors for this author submission."/>
       </FIELDS>
       <KEYS>
@@ -19,12 +19,12 @@
         <KEY NAME="author" TYPE="foreign" FIELDS="author" REFTABLE="user" REFFIELDS="id" COMMENT="The submission this online text submission relates to."/>
       </KEYS>
     </TABLE>
-	<TABLE NAME="assign_author_default" COMMENT="Info about default author submission">
+    <TABLE NAME="assignsubmission_author_def" COMMENT="Info about default author submission">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="user" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-		<FIELD NAME="coauthors" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The authors for this author submission."/>
+        <FIELD NAME="coauthors" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The authors for this author submission."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this author submission."/>
