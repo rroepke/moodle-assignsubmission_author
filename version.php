@@ -25,11 +25,11 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2016032500;
+$plugin->version = 2018072100;
 $plugin->requires = 2013110500;
 $plugin->component = 'assignsubmission_author';
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = 'v3.0';
+$plugin->release = 'v3.5';
 
 $plugin->dependencies = array(
     'mod_assign' => ANY_VERSION
