@@ -118,10 +118,10 @@ class author_group_controller {
      * @param int $assignment
      * @param $groupsused
      * @return array:
+     * @throws \coding_exception
      * @throws \dml_exception
      */
     public function get_possible_co_authors($courseid, $userid, $ingroupsonly, $assignment, $groupsused) {
-        global $DB;
         $submissioncontroller = $this->submissioncontroller;
 
         if ($groupsused) {
@@ -139,34 +139,23 @@ class author_group_controller {
                 $members = $members + groups_get_members($a->id);
             }
 
-            // Get a record set of all enrolled 'students' (roleid = 5).
-            $queryfields = '{user}.id, firstname, lastname, picture, imagealt, email';
-            $query = 'select ' . $queryfields . ' from {role_assignments}, {user} where contextid=' .
-                    $this->assignment->get_course_context()->id . ' and roleid=5 and {role_assignments}.userid={user}.id;';
-            $rs = $DB->get_recordset_sql($query);
-            $students = array();
-            foreach ($rs as $r) {
-                $students[$r->id] = '';
-            }
-
             // Collect coauthors.
             $coauthors = array();
             $seen = array();
-            foreach ($members as $r) {
-                if (array_key_exists($r->id, $students)) {
-                    $submission = $this->get_submission($r->id, $assignment);
-                    if ($submission) {
-                        if ($submission->status != 'submitted') {
-                            $authorsubmission = $this->get_author_submission($assignment, $submission->id);
-                            if (!($authorsubmission && $authorsubmission->author != $userid)) {
-                                $coauthors[$r->id] = fullname($r);
-                            }
+            foreach ($members as $id => $r) {
+                $submission = $submissioncontroller->get_submission($r->id, $assignment);
+                if ($submission) {
+                    $bool = $this->assignment->get_instance()->submissiondrafts == true;
+                    if (!$bool || $submission->status != 'submitted') {
+                        $authorsubmission = $submissioncontroller->get_author_submission($assignment, $submission->id);
+                        if (!($authorsubmission && $authorsubmission->author != $userid)) {
+                            $coauthors[$r->id] = fullname($r);
                         }
-                    } else {
-                        $coauthors[$r->id] = fullname($r);
                     }
-                    $seen[$r->id] = '';
+                } else {
+                    $coauthors[$id] = fullname($r);
                 }
+                $seen[$id] = '';
             }
 
             // User is no group -> return empty array.
@@ -175,51 +164,31 @@ class author_group_controller {
             }
         } else {
 
-            // Get all enrolled users.
-            $enroltypes = $DB->get_records('enrol', array(
-                    'courseid' => $courseid
-            ));
+            $us = enrol_get_course_users($courseid);
+            $context = \context_course::instance($courseid);
             $users = array();
-            foreach ($enroltypes as $type) {
-                $enrolledusers = $DB->get_records('user_enrolments', array(
-                        'enrolid' => $type->id
-                ));
-                foreach ($enrolledusers as $enrolleduser) {
-                    $user = $DB->get_record('user', array(
-                            'id' => $enrolleduser->userid
-                    ));
-                    array_push($users, $user);
-                }
+            foreach($us as $u) {
+                if(has_capability('mod/assign:canbecoauthor', $context, $u->id)){
+                    $users[$u->id] = $u;
+                };
             }
 
             $records = $users;
 
-            // Get a record set of all enrolled 'students' (roleid = 5).
-            $queryfields = '{user}.id, firstname, lastname, picture, imagealt, email';
-            $query = 'select ' . $queryfields . ' from {role_assignments}, {user} where contextid=' .
-                    $this->assignment->get_course_context()->id . ' and roleid=5 and {role_assignments}.userid={user}.id;';
-            $rs = $DB->get_recordset_sql($query);
-            $students = array();
-            foreach ($rs as $r) {
-                $students[$r->id] = '';
-            }
-
             // Collect coauthors.
             $coauthors = array();
-            foreach ($records as $r) {
-                if (array_key_exists($r->id, $students)) {
-                    $submission = $submissioncontroller->get_submission($r->id, $assignment);
-                    if ($submission) {
-                        $bool = $this->assignment->get_instance()->submissiondrafts == true;
-                        if (!$bool || $submission->status != 'submitted') {
-                            $authorsubmission = $submissioncontroller->get_author_submission($assignment, $submission->id);
-                            if (!($authorsubmission && $authorsubmission->author != $userid)) {
-                                $coauthors[$r->id] = fullname($r);
-                            }
+            foreach ($records as $id => $r) {
+                $submission = $submissioncontroller->get_submission($id, $assignment);
+                if ($submission) {
+                    $bool = $this->assignment->get_instance()->submissiondrafts == true;
+                    if (!$bool || $submission->status != 'submitted') {
+                        $authorsubmission = $submissioncontroller->get_author_submission($assignment, $submission->id);
+                        if (!($authorsubmission && $authorsubmission->author != $userid)) {
+                            $coauthors[$id] = fullname($r);
                         }
-                    } else {
-                        $coauthors[$r->id] = fullname($r);
                     }
+                } else {
+                    $coauthors[$id] = fullname($r);
                 }
             }
         }
