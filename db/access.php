@@ -27,16 +27,16 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
 
-    'mod/assign:canbecoauthor' => array(
-        'riskbitmask' => RISK_SPAM,
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'student' => CAP_ALLOW,
-            'manager' => CAP_PROHIBIT,
-            'coursecreator' => CAP_PROHIBIT,
-            'editingteacher' => CAP_PROHIBIT,
-            'teacher' => CAP_PROHIBIT,
-            'guest' => CAP_PROHIBIT))
+        'mod/assign:canbecoauthor' => array(
+                'riskbitmask' => RISK_SPAM,
+                'captype' => 'write',
+                'contextlevel' => CONTEXT_MODULE,
+                'archetypes' => array(
+                        'student' => CAP_ALLOW,
+                        'manager' => CAP_PROHIBIT,
+                        'coursecreator' => CAP_PROHIBIT,
+                        'editingteacher' => CAP_PROHIBIT,
+                        'teacher' => CAP_PROHIBIT,
+                        'guest' => CAP_PROHIBIT))
 
 );
