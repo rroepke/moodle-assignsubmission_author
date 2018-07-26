@@ -69,3 +69,4 @@ $string['header'] = 'Selection of Co-Authors';
 
 $string['available_coauthors'] = 'Available co-authors';
 $string['selected_coauthors'] = 'Selected co-authors';
+$string['check:saveasdefault'] = 'Save as new default co-authors in this course';

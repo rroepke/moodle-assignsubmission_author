@@ -17,13 +17,13 @@
 
             <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
                 <div class="container">
-                    <div class="card-body ">
+                    <div class="card-body">
                         <div class="too-many-alert hidden">
                             <div class="alert alert-danger">
                                 Too many co-authors selected!
                             </div>
                         </div>
-                        <div class="row justify-content-md-center justify-content-sm-center align-items-center">
+                        <div class="row align-items-center">
                             <div class="col col-4">
                                 <div class="form-group align-middle">
                                     <label for="exampleFormControlSelect2">
@@ -63,7 +63,16 @@
                                     </select>
                                 </div>
                             </div>
+                            <div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
+                                    <label class="form-check-label" for="defaultCheck1">
+                                        <?php echo get_string('check:saveasdefault', 'assignsubmission_author');?>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
+
                     </div>
                 </div>
             </div>
