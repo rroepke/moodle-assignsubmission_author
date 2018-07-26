@@ -31,11 +31,13 @@ define('ASSIGNSUBMISSIONAUTHOR_MAXAUTHORS', 20);
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
 require_once($CFG->dirroot . '/mod/assign/submission/author/classes/controllers/submission_controller.php');
 require_once($CFG->dirroot . '/mod/assign/submission/author/classes/controllers/author_group_controller.php');
+require_once($CFG->dirroot . '/mod/assign/submission/author/classes/template_builder.php');
 require_once($CFG->dirroot . '/mod/assign/submission/author/classes/utilities.php');
 
-use assign_submission_author\utilities;
 use assign_submission_author\submission_controller;
 use assign_submission_author\author_group_controller;
+use assign_submission_author\template_builder;
+use assign_submission_author\utilities;
 
 /**
  * Library class for author submission plugin extending submission plugin base class
@@ -144,6 +146,8 @@ class assign_submission_author extends assign_submission_plugin
      */
     public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data) {
         global $USER, $COURSE;
+
+        utilities::add_javascript('author_selection.js');
 
         $authorgroupcontroller = new author_group_controller($this->assignment);
         $submissioncontroller = new submission_controller();
@@ -294,6 +298,23 @@ class assign_submission_author extends assign_submission_plugin
 
         // Display 3rd option for no coauthors.
         $mform->addElement('checkbox', 'nocoauthors', '', get_string('choose_nocoauthors', 'assignsubmission_author'), 1);
+
+        $mform->addElement('header', 'header', get_string('header', 'assignsubmission_author'));
+
+        $templatebuilder = new template_builder();
+        $templatebuilder->set_template('author_selection');
+
+        $assign = [];
+
+        $availablecoauthors = array_diff_key($achoices, $selectedauthors);
+        unset($availablecoauthors[0]);
+
+        $assign['choices'] = $availablecoauthors;
+        $assign['coauthors'] = array_slice($selectedauthors,0);
+
+        $templatebuilder->assign_multiple($assign);
+
+        $mform->addElement('html', $templatebuilder->load_template());
 
         return true;
     }

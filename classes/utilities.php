@@ -25,9 +25,25 @@
  */
 namespace assign_submission_author;
 
+use moodle_url;
+
 defined('MOODLE_INTERNAL') || die();
 
 class utilities {
+
+    /**
+     * Adds JavaScript
+     *
+     * @param string $filename
+     * @throws \moodle_exception
+     */
+    public static function add_javascript($filename = null) {
+        global $CFG, $PAGE;
+
+        if (!is_null($filename)) {
+            $PAGE->requires->js(new moodle_url($CFG->wwwroot . '/mod/assign/submission/author/js/' . $filename));
+        }
+    }
 
     /**
      * @param $assignmentid
