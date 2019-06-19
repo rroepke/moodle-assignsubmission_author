@@ -52,9 +52,6 @@ class utilities {
 
         return false;
     }
-    /*
-     * Notice: Trying to get property 'id' of non-object in /vagrant/wwwmoodle/mod/assign/submission/author/classes/utilities.php on line 73
-     */
 
     /**
      * Get the author ids and names as an array

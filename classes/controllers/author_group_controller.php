@@ -167,8 +167,8 @@ class author_group_controller {
             $us = enrol_get_course_users($courseid);
             $context = \context_course::instance($courseid);
             $users = array();
-            foreach($us as $u) {
-                if(has_capability('mod/assign:canbecoauthor', $context, $u->id)){
+            foreach ($us as $u) {
+                if (has_capability('mod/assign:canbecoauthor', $context, $u->id)) {
                     $users[$u->id] = $u;
                 };
             }
@@ -249,7 +249,7 @@ class author_group_controller {
      *
      * @param int $user
      * @param int $course
-     * @return Ambigous <mixed, stdClass, false, boolean>
+     * @return stdClass <mixed, stdClass, false, boolean>
      * @throws \dml_exception
      */
     public function get_author_default($user, $course) {

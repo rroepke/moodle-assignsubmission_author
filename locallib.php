@@ -195,6 +195,7 @@ class assign_submission_author extends assign_submission_plugin
         $possiblecoauthors = $authorgroupcontroller->get_possible_co_authors($courseid,
                 $userid, $ingroupsonly, $assignment, $groupsused);
 
+        $userarr = null;
         $userarr[$userid] = '';
 
         // Get author default.
@@ -788,8 +789,8 @@ class assign_submission_author extends assign_submission_plugin
     /**
      * Creates summary string with author and coauthors
      *
-     * @param unknown $author
-     * @param unknown $coauthors
+     * @param array $author
+     * @param array $coauthors
      * @return string
      * @throws coding_exception
      */
@@ -826,7 +827,7 @@ class assign_submission_author extends assign_submission_plugin
         $message = $subject . ': ' . get_string('message', 'assignsubmission_author', $a);
         foreach ($coauthors as $coauthor) {
             $userto = core_user::get_user($coauthor);
-            $eventdata = new stdClass();
+            $eventdata = new \core\message\message;
             $eventdata->modulename = 'assign';
             $eventdata->userfrom = $USER;
             $eventdata->userto = $userto;
