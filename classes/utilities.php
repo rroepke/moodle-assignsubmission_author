@@ -88,7 +88,7 @@ class utilities {
     /**
      * Read out the selected coauthors and returns their ids in an array
      *
-     * @param stdClass $data
+     * @param \stdClass $data
      * @return int[] selected coauthor ids
      */
     public static function get_selected_coauthors($data) {
