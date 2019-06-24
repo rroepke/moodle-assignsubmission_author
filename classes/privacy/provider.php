@@ -39,7 +39,7 @@ use \core_privacy\local\request\writer;
  * @copyright  2019 Benedikt Schneider (@Nullmann)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements 
+class provider implements
     \core_privacy\local\metadata\provider,
     \mod_assign\privacy\assignsubmission_provider,
     \mod_assign\privacy\assignsubmission_user_provider {
@@ -62,7 +62,7 @@ class provider implements
             ],
             'privacy:metadata:assignsubmission_author'
             );
-        
+
         $collection->add_database_table(
             'assignsubmission_author_def',
             [
@@ -73,13 +73,13 @@ class provider implements
             ],
             'privacy:metadata:assignsubmission_author_def'
             );
-        
+
         return $collection;
     }
 
     /**
      * This is covered by mod_assign provider and the query on assign_submissions.
-     * 
+     *
      * @see \mod_assign\privacy\assignsubmission_provider::get_context_for_userid_within_submission()
      * @param  int $userid The user ID that we are finding contexts for.
      * @param  contextlist $contextlist A context list to add sql and params to for contexts.
@@ -87,7 +87,7 @@ class provider implements
     public static function get_context_for_userid_within_submission(int $userid, contextlist $contextlist) {
         // This is already fetched from mod_assign because there cannot because this plugin needs an entyr in assign_submission to work.
     }
-    
+
     /**
      * This is covered by mod_assign provider and the query on assign_submissions.
      *
@@ -97,47 +97,40 @@ class provider implements
     public static function get_student_user_ids(\mod_assign\privacy\useridlist $useridlist) {
         // There is not need to add addtional sql because the submissions are done regularly.
     }
-    
+
     /**
      * Export all user data for this plugin.
-     * 
+     *
      * @see \mod_assign\privacy\assignsubmission_provider::export_submission_user_data()
      * @param  assign_plugin_request_data $exportdata Data used to determine which context and user to export and other useful
      * information to help with exporting.
      */
     public static function export_submission_user_data(assign_plugin_request_data $exportdata) {
-        $userid = ($exportdata->get_user() != null);
-        $submission = $exportdata->get_pluginobject();
-        
-        // TODO!
-        
-        $context = $exportdata->get_context();
+        global $DB;
+
         if ($exportdata->get_user() != null) {
             return null;
         }
-        
-        /* Taken from file submission
-        $user = new \stdClass();
-        $assign = $exportdata->get_assign();
-        $plugin = $assign->get_plugin_by_type('assignsubmission', 'file');
-        $files = $plugin->get_files($exportdata->get_pluginobject(), $user);
-        foreach ($files as $file) {
-            $userid = $exportdata->get_pluginobject()->userid;
-            writer::with_context($exportdata->get_context())->export_file($exportdata->get_subcontext(), $file);
-            
-            // Plagiarism data.
-            $coursecontext = $context->get_course_context();
-            \core_plagiarism\privacy\provider::export_plagiarism_user_data($userid, $context, $exportdata->get_subcontext(), [
-                'cmid' => $context->instanceid,
-                'course' => $coursecontext->instanceid,
-                'userid' => $userid,
-                'file' => $file
-            ]);
-        }
-        */
+
+        $context = $exportdata->get_context();
+        $courseid = $context->get_course_context()->instanceid;
+        $userid = $exportdata->get_pluginobject()->userid;
+
+        // Get results from the first table.
+        $assignid = $exportdata->get_assignid();
+        $assignsubmissionauthor = $DB->get_record('assignsubmission_author', array('author' => $userid, 'assignment' => $assignid), 'author,authorlist');
+
+        // Get results from the second table.
+        $coauthorlist = $DB->get_record('assignsubmission_author_def', array('user' => $userid, 'course' => $courseid), 'coauthors');
+        $coauthorlist->defaultcoauthors = $coauthorlist->coauthors; // Give the table entry a better name.
+        unset($coauthorlist->coauthors);
+
+        // Merge the results and print them.
+        $exportobject = (object) array_merge((array) $assignsubmissionauthor, (array) $coauthorlist);
+        writer::with_context($context)->export_data($exportdata->get_subcontext(), (object)$exportobject);
 
     }
-    
+
     /**
      * Delete all the coauthors made for this context.
      * @see \mod_assign\privacy\assignsubmission_provider::delete_submission_for_context()
@@ -146,15 +139,16 @@ class provider implements
     public static function delete_submission_for_context(assign_plugin_request_data $requestdata) {
         global $DB;
 
-        // Delete all entries in assignsubmission_author where the assignid matches. Could have also be done with $requestdata->getsubmissionids but is faster this way.
+        // Delete all entries in assignsubmission_author where the assignid matches.
         $assignid = $requestdata->get_assignid();
         $DB->delete_records('assignsubmission_author', array ('assignment' => $assignid));
 
-        // Delete all entries in assignsubmission_author_def where the courseid matches. Should not be done on a user basis as a user can have different settings for different courses.
+        // Delete all entries in assignsubmission_author_def where the courseid matches.
+        // Should not be done on a user basis as a user can have different settings for different courses.
         $courseid = $DB->get_record('assign', array ('id' => $assignid), 'course');
         $DB->delete_records('assignsubmission_author_def', array ('course' => $courseid));
     }
-    
+
     /**
      * A call to this method should delete user data (where practical) using the userid and submission.
      * @see \mod_assign\privacy\assignsubmission_provider::delete_submission_for_userid()
@@ -163,36 +157,60 @@ class provider implements
     public static function delete_submission_for_userid(assign_plugin_request_data $exportdata) {
         global $DB;
 
-        // Can be easily deleted as this is the preference for this user in this course.
         $userdeleteid = $exportdata->get_user()->id;
+        $assignid = $exportdata->get_assignid();
+
+        // Delete default settings for this user.
         $DB->delete_records('assignsubmission_author_def', array ('user' => $userdeleteid));
 
-        /*
+        // Get the results in which the user is in the author column and swap with one of the userids from the coauthors.
         $params = [
-            'userid' => $userdeleteid
+            'userid' => $userdeleteid,
+            'assignid' => $assignid
         ];
+        $sql = "SELECT * FROM {assignsubmission_author}
+                  WHERE author = :userid
+                  AND assignment = :assignid";
+        $rows = $DB->get_records_sql($sql, $params);
 
-        // Get the results in which the user is in the author column.
-        $sql = "SELECT * FROM {assignsubmission_author}
-                  WHERE author = :userid1";
-        $rows = $DB->get_records_sql($sql, $params);
-        // TODO: Swap author and one of the ids in authorlist?
-        
-        // Get the results in which the user could be in the author column. Userid 50 also matches with userid 500.
-        $sql = "SELECT * FROM {assignsubmission_author}
-                  WHERE authorlist LIKE '%:userid1%'";
-        $rows = $DB->get_records_sql($sql, $params);
-        
-        foreach($rows as $row) {
-            // It is a comma-separated list, so we need to explode
-            $users = explode(',', $row->authorlist);
-            foreach($users as $user) {
-                if ($user->id == $userdeleteid) {
-                    unset($users[$user->id]); // TODO: Does this work?
+        foreach ($rows as $row) {
+            if ($row->author == $userdeleteid) {
+                if (!$row->authorlist) {
+                    // If the authorlist is empty the row can be deleted completely.
+                    $DB->delete_records('assignsubmission_author', array ('id' => $row->id));
+                } else {
+                    // Else we need to swap author and one of the authorlist.
+                    $row->author = explode(',', $row->authorlist)[0]; // Overwrite the old author.
+                    // Remove user from authorlist.
+                    $authorlistarray = array_diff(explode(',', $row->authorlist), array($userdeleteid));
+                    $row->authorlist = implode(',', $authorlistarray); // Convert to comma-separated list again.
+                    $DB->update_record('assignsubmission_author', $row);
                 }
             }
         }
-        */
+
+        // Get the results in which the user could be in the author column and delete its userid.
+        $params = [
+            'userid' => '%'.$userdeleteid.'%',
+            'assignid' => $assignid
+        ];
+        $sql = "SELECT * FROM {assignsubmission_author}
+                  WHERE assignment = :assignid
+                  AND ".$DB->sql_like('authorlist', ':userid');
+
+        $rows = $DB->get_records_sql($sql, $params);
+
+        foreach ($rows as $row) {
+            $authorids = explode(',', $row->authorlist);
+            foreach ($authorids as $userid) {
+                if ($userid == $userdeleteid) { // Necessary because userid 5 matches userid 50 in sql like clause.
+                    // Remove user from authorlist.
+                    $authorlistarray = array_diff(explode(',', $row->authorlist), array($userdeleteid));
+                    $row->authorlist = implode(',', $authorlistarray); // Convert to comma-separated list again.
+                    $DB->update_record('assignsubmission_author', $row);
+                }
+            }
+        }
 
     }
 
@@ -211,7 +229,7 @@ class provider implements
 
         $submissionids = $deletedata->get_submissionids();
 
-        foreach($submissionids as $submissionid) {
+        foreach ($submissionids as $submissionid) {
             $DB->delete_records('assignsubmission_author', array ('submission' => $submissionid));
         }
     }

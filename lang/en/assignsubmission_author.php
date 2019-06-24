@@ -71,15 +71,10 @@ $string['privacy:assignsubmission_author:id'] = 'Identifier of this table entry.
 $string['privacy:assignsubmission_author:assignment'] = 'ID of corresponding assignment in the "assign" table.';
 $string['privacy:assignsubmission_author:submission'] = 'ID of corresponding assignment in the "assign_submission" table.';
 $string['privacy:assignsubmission_author:author'] = 'ID of student who submitted the original assignment.';
-$string['privacy:assignsubmission_author:authorlist'] = 'Comma-separated list of studend IDs the original student declared as co-authors.';
-    
+$string['privacy:assignsubmission_author:authorlist'] = 'Comma-separated list of studend IDs the  student declared as co-authors.';
+
 $string['privacy:metadata:assignsubmission_author_def'] = 'Information about default values for co authors.';
 $string['privacy:assignsubmission_author_def:id'] = 'Identifier of this table entry.';
-$string['privacy:assignsubmission_author_def:course'] = 'The course in which these defaults should be applied.';
+$string['privacy:assignsubmission_author_def:course'] = 'The course ID in which these defaults should be applied.';
 $string['privacy:assignsubmission_author_def:user'] = 'ID of student who submitted the original assignment.';
-$string['privacy:assignsubmission_author_def:coauthors'] = 'Comma-separated list of studend IDs the original student declared as co-authors.';
-    
-    
-    
-    
-    
+$string['privacy:assignsubmission_author_def:coauthors'] = 'Comma-separated list of studend IDs the student declared as his/her default co-authors.';

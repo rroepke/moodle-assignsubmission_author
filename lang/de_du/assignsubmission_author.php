@@ -60,6 +60,19 @@ $string['enabled_help'] = 'Teilnehmer/innen können nach der Aktivierung fü ihr
 $string['pluginname'] = 'Abgabe als Autorengruppen';
 $string['nopossiblecoauthors'] = 'Du kannst keine Co-Autoren auswählen, da du keiner Gruppe angehörst. Bitte kontaktiere den Veranstalter des Kurses.';
 
-
 $string['error_teamsubmission'] = 'Es kann keine Lösung eingereicht werden. <br><br>Der Abgabetyp "Autorengruppen" kann nicht gemeinsam mit der Einstellung für Gruppeneinreichungen genutzt werden. Bitte kontaktiere bei weiteren Fragen den Veranstalter des Kurses.';
 $string['header'] = 'Co-Autoren-Auswahl';
+
+// Privacy API.
+$string['privacy:metadata:assignsubmission_author'] = 'Informationen über die Einreichung von Autoren, einschließlich Mitautoren';
+$string['privacy:assignsubmission_author:id'] = 'ID dieses Tabelleneintrages';
+$string['privacy:assignsubmission_author:assignment'] = 'ID der entsprechenden Zuordnung in der Tabelle "assign".';
+$string['privacy:assignubmission_author:submission'] = 'ID der entsprechenden Zuordnung in der Tabelle "assign_submission".';
+$string['privacy:assignsubmission_author:author'] = 'ID des Studierenden, der die ursprüngliche Aufgabe eingereicht hat';
+$string['privacy:assignignsubmission_author:authorlist'] = 'Comma-separated list of studend IDs, die der Student als Co-Autoren deklariert hat';
+
+$string['privacy:metadata:assignsubmission_author_def'] = 'Informationen über Standardwerte für Co-Autoren';
+$string['privacy:assignignsubmission_author_def:id'] = 'ID dieses Tabelleneintrages';
+$string['privacy:assignsubmission_author_def:course'] = 'Die Kurs ID, in dem diese Standardwerte angewendet werden sollen.';
+$string['privacy:assignignsubmission_author_def:user'] = 'ID des Studierenden, der die ursprüngliche Aufgabe eingereicht hat';
+$string['privacy:assignignsubmission_author_def:coauthors'] = 'Kommagetrennte Liste der Studierenden-IDs, die der Schüler als seine Standard-Koautoren deklariert hat.';
