@@ -44,13 +44,16 @@ class provider implements
     \mod_assign\privacy\assignsubmission_provider,
     \mod_assign\privacy\assignsubmission_user_provider {
 
+    // Legacy support for Moodle versions 3.3 and older.
+    use \core_privacy\local\legacy_polyfill;
+
     /**
      * Return meta data about this plugin.
      *
      * @param  collection $collection A list of information to add to.
      * @return collection Return the collection after adding to it.
      */
-    public static function get_metadata(collection $collection) : collection {
+    public static function _get_metadata(collection $collection) {
         $collection->add_database_table(
             'assignsubmission_author',
             [

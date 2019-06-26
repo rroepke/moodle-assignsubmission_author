@@ -37,6 +37,7 @@ $string['group'] = 'Group';
 $string['coauthors'] = 'Co-authors';
 $string['defaultcoauthors'] = 'Defaul co-authors';
 
+$string['oneauthoronly'] = 'The maximum number of coauthors has been set to 1.';
 $string['noteamsubmission'] = 'The submission type "Author groups" cannot be used with the group submission settings. Please contact the course manager if you have any questions.';
 
 $string['subject'] = 'Author group submission in course <a href="{$a->courseurl}">{$a->coursename}</a>';

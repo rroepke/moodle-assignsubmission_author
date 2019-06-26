@@ -37,6 +37,7 @@ $string['group'] = 'Gruppe';
 $string['coauthors'] = 'Co-Autoren';
 $string['defaultcoauthors'] = 'Standard-Co-Autoren';
 
+$string['oneauthoronly'] = 'Die maximale Anzahl an Co-Autoren wurde auf 1 gesetzt.';
 $string['noteamsubmission'] = 'Der Abgabetyp "Autorengruppen" kann nicht gemeinsam mit der Einstellung für Gruppeneinreichungen genutzt werden. Bitte kontaktiere bei weiteren Fragen den Veranstalter des Kurses.';
 
 $string['subject'] = 'Abgabe als Autorengruppe im Kurs <a href="{$a->courseurl}">{$a->coursename}</a>';
