@@ -66,6 +66,9 @@ $string['error_teamsubmission'] = 'You cannot submit a solution. <br><br>The sub
 
 $string['header'] = 'Selection of Co-Authors';
 
+// Capability.
+$string['author:canbecoauthor'] = 'The user is allowed to assign co authors.';
+
 // Privacy API.
 $string['privacy:metadata:assignsubmission_author'] = 'Information about author submission, including co authors.';
 $string['privacy:assignsubmission_author:id'] = 'Identifier of this table entry.';

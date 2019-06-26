@@ -64,6 +64,9 @@ $string['nopossiblecoauthors'] = 'Du kannst keine Co-Autoren auswählen, da du k
 $string['error_teamsubmission'] = 'Es kann keine Lösung eingereicht werden. <br><br>Der Abgabetyp "Autorengruppen" kann nicht gemeinsam mit der Einstellung für Gruppeneinreichungen genutzt werden. Bitte kontaktiere bei weiteren Fragen den Veranstalter des Kurses.';
 $string['header'] = 'Co-Autoren-Auswahl';
 
+// Capability.
+$string['author:canbecoauthor'] = 'Der Nutzer darf Co-Autoren bestimmen.';
+
 // Privacy API.
 $string['privacy:metadata:assignsubmission_author'] = 'Informationen über die Einreichung von Autoren, einschließlich Mitautoren';
 $string['privacy:assignsubmission_author:id'] = 'ID dieses Tabelleneintrages';
