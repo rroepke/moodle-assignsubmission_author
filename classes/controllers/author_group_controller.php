@@ -215,7 +215,7 @@ class author_group_controller {
     public function set_author_default($coauthors, $userid, $courseid) {
         global $DB;
         $authordefault = $DB->get_record('assignsubmission_author_def', array(
-                'user' => $userid,
+                'userid' => $userid,
                 'course' => $courseid
         ));
         if ($authordefault) {
@@ -225,7 +225,7 @@ class author_group_controller {
             $authordefault = new stdClass();
             $authordefault->coauthors = $coauthors;
             $authordefault->course = $courseid;
-            $authordefault->user = $userid;
+            $authordefault->userid = $userid;
             return $DB->insert_record('assignsubmission_author_def', $authordefault, false) > 0;
         }
     }
@@ -255,7 +255,7 @@ class author_group_controller {
     public function get_author_default($user, $course) {
         global $DB;
         return $DB->get_record('assignsubmission_author_def', array(
-                'user' => $user,
+                'userid' => $user,
                 'course' => $course
         ));
     }

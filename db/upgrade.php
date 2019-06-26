@@ -51,6 +51,19 @@ function xmldb_assignsubmission_author_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2018072101, 'assignsubmission', 'author');
     }
 
+    if ($oldversion < 2019062602) {
+
+        // Rename field user on table assignsubmission_author_def to userid.
+        $table = new xmldb_table('assignsubmission_author_def');
+        $field = new xmldb_field('user', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'coauthors');
+
+        // Launch rename field userid.
+        $dbman->rename_field($table, $field, 'userid');
+
+        // Author savepoint reached.
+        upgrade_plugin_savepoint(true, 2019062602, 'assignsubmission', 'author');
+    }
+
     return true;
 }
 

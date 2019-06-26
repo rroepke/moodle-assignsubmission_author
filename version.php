@@ -25,7 +25,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2019062601;
+$plugin->version = 2019062602;
 $plugin->requires = 2013110500;
 $plugin->component = 'assignsubmission_author';
 $plugin->maturity = MATURITY_STABLE;

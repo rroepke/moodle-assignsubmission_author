@@ -70,9 +70,9 @@ class provider implements
             'assignsubmission_author_def',
             [
                 'id' => 'privacy:assignsubmission_author_def:id',
-                'assignment' => 'privacy:assignsubmission_author_def:course',
-                'submission' => 'privacy:assignsubmission_author_def:user',
-                'author' => 'privacy:assignsubmission_author_def:coauthors',
+                'course' => 'privacy:assignsubmission_author_def:course',
+                'userid' => 'privacy:assignsubmission_author_def:userid',
+                'coauthors' => 'privacy:assignsubmission_author_def:coauthors',
             ],
             'privacy:metadata:assignsubmission_author_def'
             );
@@ -124,7 +124,7 @@ class provider implements
         $assignsubmissionauthor = $DB->get_record('assignsubmission_author', array('author' => $userid, 'assignment' => $assignid), 'author,authorlist');
 
         // Get results from the second table.
-        $coauthorlist = $DB->get_record('assignsubmission_author_def', array('user' => $userid, 'course' => $courseid), 'coauthors');
+        $coauthorlist = $DB->get_record('assignsubmission_author_def', array('userid' => $userid, 'course' => $courseid), 'coauthors');
         $coauthorlist->defaultcoauthors = $coauthorlist->coauthors; // Give the table entry a better name.
         unset($coauthorlist->coauthors);
 
@@ -164,7 +164,7 @@ class provider implements
         $assignid = $exportdata->get_assignid();
 
         // Delete default settings for this user.
-        $DB->delete_records('assignsubmission_author_def', array ('user' => $userdeleteid));
+        $DB->delete_records('assignsubmission_author_def', array ('userid' => $userdeleteid));
 
         // Get the results in which the user is in the author column and swap with one of the userids from the coauthors.
         $params = [
