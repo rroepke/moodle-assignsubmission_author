@@ -168,7 +168,7 @@ class author_group_controller {
             $context = \context_course::instance($courseid);
             $users = array();
             foreach ($us as $u) {
-                if (has_capability('mod/assign:canbecoauthor', $context, $u->id)) {
+                if (has_capability('assignsubmission/author:canbecoauthor', $context, $u->id)) {
                     $users[$u->id] = $u;
                 };
             }
