@@ -127,10 +127,12 @@ class provider implements
         $coauthorlist = $DB->get_record('assignsubmission_author_def', array('userid' => $userid, 'course' => $courseid), 'coauthors');
         $coauthorlist->defaultcoauthors = $coauthorlist->coauthors; // Give the table entry a better name.
         unset($coauthorlist->coauthors);
+        
+        $path = array_merge($exportdata->get_subcontext(), [get_string('pluginname', 'assignsubmission_author')]);
 
         // Merge the results and print them.
         $exportobject = (object) array_merge((array) $assignsubmissionauthor, (array) $coauthorlist);
-        writer::with_context($context)->export_data($exportdata->get_subcontext(), (object)$exportobject);
+        writer::with_context($context)->export_data($path, (object)$exportobject);
 
     }
 
