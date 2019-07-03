@@ -127,7 +127,7 @@ class provider implements
         $coauthorlist = $DB->get_record('assignsubmission_author_def', array('userid' => $userid, 'course' => $courseid), 'coauthors');
         $coauthorlist->defaultcoauthors = $coauthorlist->coauthors; // Give the table entry a better name.
         unset($coauthorlist->coauthors);
-        
+
         $path = array_merge($exportdata->get_subcontext(), [get_string('pluginname', 'assignsubmission_author')]);
 
         // Merge the results and print them.
