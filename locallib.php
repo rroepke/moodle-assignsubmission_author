@@ -777,6 +777,40 @@ class assign_submission_author extends assign_submission_plugin
     }
 
     /**
+     * Remove files from the submissions of all other group members.
+     * Works like
+     * @see assign::remove_submission()
+     *
+     * @param stdClass $submission The submission
+     * @return boolean
+     */
+    public function remove(stdClass $submission) {
+        global $USER;
+
+        $submissioncontroller = new submission_controller();
+        $assignmentid = $this->assignment->get_instance()->id;
+
+        if ($submission) {
+            $authorsubmission = $submissioncontroller->get_author_submission($assignmentid, $submission->id);
+            $allauthorids = explode(',', $authorsubmission->author . ',' . $authorsubmission->authorlist);
+
+            // Also delete this submission for every other author.
+            foreach ($allauthorids as $authorid) {
+                if ($authorid != $USER->id) { // The submission was already deleted for this user.
+                    $submissiontodelete = $submissioncontroller->get_submission($authorid, $assignmentid);
+                    foreach ($this->assignment->get_submission_plugins() as $plugin) {
+                        if ($plugin->is_enabled() && $plugin->is_visible() && $plugin->get_type() != 'author') {
+                            $plugin->remove($submissiontodelete);
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Delete submission record
      *
      * @param int $id
