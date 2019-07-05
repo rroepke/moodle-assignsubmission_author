@@ -57,25 +57,30 @@ class author_group_controller {
      * @param string $authorlist
      * @throws \dml_exception
      */
-    public function create_author_group($coauthors, $submission, $authorlist) {
-        global $CFG;
+    public function create_author_group($coauthors, $submission, $authorlist, $data) {
+        global $CFG, $DB;
         $submissioncontroller = $this->submissioncontroller;
         $assignment = $submission->assignment;
+
         $author = $submission->userid;
         foreach ($coauthors as $key => $coauthor) {
 
+            // A "new" submission is created when a student simply views the assign page.
             $coauthorsubmission = $submissioncontroller->get_submission($coauthor, $assignment);
 
             if (!$coauthorsubmission) {
-
                 $submissioncontroller->create_submission($coauthor, $submission);
                 require_once($CFG->dirroot . '/mod/assign/lib.php');
                 $assign = clone $this->assignment->get_instance();
                 $assign->cmidnumber = $this->assignment->get_course_module()->idnumber;
                 assign_update_grades($assign, $coauthor);
                 $coauthorsubmission = $submissioncontroller->get_submission($coauthor, $assignment);
-
+            } else {
+                $coauthorsubmission->status = $submission->status; // Update the status to submitted if it was previously created.
+                $DB->update_record('assign_submission', $coauthorsubmission);
             }
+
+            $this->duplicate_submission($coauthorsubmission, $data);
 
             $id = $coauthorsubmission->id;
             $submissioncontroller->create_author_submission($assignment, $id, $author, $authorlist);
@@ -92,12 +97,16 @@ class author_group_controller {
      * @param string $authorlist
      * @throws \dml_exception
      */
-    public function update_author_group($coauthors, $assignment, $author, $authorlist) {
+    public function update_author_group($coauthors, $assignment, $author, $authorlist, $data) {
         global $DB;
         $submissioncontroller = $this->submissioncontroller;
         foreach ($coauthors as $coauthor) {
             $coauthorsubmission = $submissioncontroller->get_submission($coauthor, $assignment);
             if ($coauthorsubmission) {
+
+                $this->duplicate_submission($coauthorsubmission, $data);
+
+                // Update the coauthor table.
                 $submissionid = $coauthorsubmission->id;
                 $authorsubmission = $submissioncontroller->get_author_submission($assignment, $submissionid);
                 if ($authorsubmission) {
@@ -105,6 +114,7 @@ class author_group_controller {
                     $authorsubmission->authorlist = $authorlist;
                     $DB->update_record('assignsubmission_author', $authorsubmission, false);
                 }
+
             }
         }
     }
@@ -274,41 +284,20 @@ class author_group_controller {
     }
 
     /**
-     * Set onlinetext submission records for all coauthors
+     * Duplicates the submission for the current user.
+     * This function works like
+     * @see \assign::save_submission()
      *
-     * @param int[] $coauthors
-     * @param stdClass $data
-     * @throws \dml_exception
+     * @param stdClass $submission The submission which should be written over. Essentially selects the user.
+     * @param stdClass $data The submitted data (file, comments, onlinetext, ...) which is used to write over the above mentionsed submission.
      */
-    public function set_onlinetext_submission_for_coauthors($coauthors, $data) {
-        global $DB;
-
-        $submissioncontroller = $this->submissioncontroller;
-
-        // Imitate behaviour of the onlinetext editor plugin for submission.
-        if (isset($data->onlinetext_editor)) {
-            $assignment = $this->assignment->get_instance()->id;
-            $text = $data->onlinetext_editor['text'];
-            $format = $data->onlinetext_editor['format'];
-            foreach ($coauthors as $coauthor) {
-                $submission = $submissioncontroller->get_submission($coauthor, $assignment);
-                $onlinetextsubmission = $DB->get_record('assignsubmission_onlinetext', array(
-                        'assignment' => $assignment,
-                        'submission' => $submission->id
-                ));
-                if ($onlinetextsubmission) {
-                    $onlinetextsubmission->onlinetext = $text;
-                    $onlinetextsubmission->onlineformat = $format;
-                    $DB->update_record('assignsubmission_onlinetext', $onlinetextsubmission);
-                } else {
-                    $onlinetextsubmission = new stdClass();
-                    $onlinetextsubmission->assignment = $assignment;
-                    $onlinetextsubmission->submission = $submission->id;
-                    $onlinetextsubmission->onlinetext = $text;
-                    $onlinetextsubmission->onlineformat = $format;
-                    $DB->insert_record('assignsubmission_onlinetext', $onlinetextsubmission);
-                }
+    public function duplicate_submission($submission, $data) {
+        foreach ($this->assignment->get_submission_plugins() as $plugin) {
+            if ($plugin->is_enabled() && $plugin->is_visible() && $plugin->get_type() != 'author') { // Avoid infinite loop by excluding this plugin.
+                $plugin->save($submission, $data);
             }
         }
+
     }
+
 }

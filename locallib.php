@@ -327,45 +327,44 @@ class assign_submission_author extends assign_submission_plugin
         $courseid = $COURSE->id;
         $assignment = $this->assignment->get_instance()->id;
 
-        // If already submission then update else create.
         $currentcoauthors = array();
         if ($submission) {
-            // If already author submission then update else create.
             $authorsubmission = $submissioncontroller->get_author_submission($assignment, $submission->id);
 
-            if ($authorsubmission) {
-                // UPDATE AUTHORSUBMISSION.
+            if ($authorsubmission) { // Update existing author submission.
 
                 // Get current coauthors as array.
                 $currentcoauthors = explode(',', $authorsubmission->authorlist);
 
                 if (isset($data->groupcoauthors) && $data->groupcoauthors == 1) {
-                    // Fourth (4th) option - coauthor perspective.
-                    $currentcoauthors = explode(',', $authorsubmission->author . ',' . $authorsubmission->authorlist);
+                    // Option "Choose group" (which the original author created) - coauthor perspective.
+                    $allauthorids = explode(',', $authorsubmission->author . ',' . $authorsubmission->authorlist);
 
-                    // Update onlinetext submission.
-                    if (utilities::is_plugin_enabled($this->assignment->get_instance()->id,
-                            ASSIGNSUBMISSION_ONLINETEXT,
-                            'assignsubmission')) {
-                        $authorgroupcontroller->set_onlinetext_submission_for_coauthors($currentcoauthors, $data);
+                    // Clone this submission for every other author
+                    foreach ($allauthorids as $authorid) {
+                        if ($authorid != $userid) {
+                            $submissiontooverwrite = $submissioncontroller->get_submission($authorid, $assignment);
+                            $authorgroupcontroller->duplicate_submission($submissiontooverwrite, $data);
+                        }
                     }
 
                     return true;
                 } else if ($authorsubmission->author == $userid) {
                     if (isset($data->selcoauthors) && $data->selcoauthors == 1) {
-                        // First (1st) option - author perspective.
+                        // Option "Choose co-authors" and selecting coauthors - author perspective.
 
                         // Get new selected coauthors.
                         $selectedcoauthors = utilities::get_selected_coauthors($data);
 
-                        // If no new selected coauthors then delete current authorgroup else just update.
+                        // If no new selected coauthors selected, delete current authorgroup.
                         if (count($selectedcoauthors) == 0) {
                             $deletecoauthors = $currentcoauthors;
 
                             $authorgroupcontroller->delete_author_group($deletecoauthors, $submission->assignment);
 
                             $submissioncontroller->delete_author_submission($userid, $submission->assignment);
-                        } else {
+
+                        } else { // There are new coauthors selected, update author group.
 
                             // Distinguish between new coauthors, deleted coauthors, current coauthors.
                             $deletecoauthors = array_diff($currentcoauthors, $selectedcoauthors);
@@ -380,23 +379,11 @@ class assign_submission_author extends assign_submission_plugin
                             $authorlist = implode(',', $currentcoauthors);
 
                             // Create and update author group with new and current coauthors.
-                            $authorgroupcontroller->create_author_group($newcoauthors,
-                                    $submission,
-                                    $authorlist);
-                            $authorgroupcontroller->update_author_group($updatecoauthors,
-                                    $submission->assignment,
-                                    $author,
-                                    $authorlist);
+                            $authorgroupcontroller->create_author_group($newcoauthors, $submission, $authorlist, $data);
+                            $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data);
 
                             // Update own author submission.
                             $submissioncontroller->update_author_submission($authorsubmission, $author, $authorlist);
-
-                            // If onlinetext plugin is enabled then update/create submissions.
-                            if (utilities::is_plugin_enabled($this->assignment->get_instance()->id,
-                                    ASSIGNSUBMISSION_ONLINETEXT,
-                                    'assignsubmission')) {
-                                $authorgroupcontroller->set_onlinetext_submission_for_coauthors($currentcoauthors, $data);
-                            }
 
                             // If default option is set then save this group as default group.
                             if (isset($data->asdefault) && $data->asdefault == 1) {
@@ -411,7 +398,7 @@ class assign_submission_author extends assign_submission_plugin
 
                         return true;
                     } else if (isset($data->defcoauthors) && $data->defcoauthors == 1) {
-                        // Second (2nd) option - author perspective.
+                        // Option "Save as new default co-authors" - author perspective.
 
                         // Get default coauthors.
                         $defaultcoauthors = $authorgroupcontroller->get_default_coauthors($userid, $courseid);
@@ -430,23 +417,11 @@ class assign_submission_author extends assign_submission_plugin
                         $authorlist = implode(',', $currentcoauthors);
 
                         // Create and update author group with new and current coauthors.
-                        $authorgroupcontroller->update_author_group($updatecoauthors,
-                                $submission->assignment,
-                                $author,
-                                $authorlist);
-                        $authorgroupcontroller->create_author_group($newcoauthors,
-                                $submission,
-                                $authorlist);
+                        $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data);
+                        $authorgroupcontroller->create_author_group($newcoauthors, $submission, $authorlist, $data);
 
                         // Update own author submission.
                         $submissioncontroller->update_author_submission($authorsubmission, $author, $authorlist);
-
-                        // If onlinetext plugin is enabled then update/create submissions.
-                        if (utilities::is_plugin_enabled($this->assignment->get_instance()->id,
-                                ASSIGNSUBMISSION_ONLINETEXT,
-                                'assignsubmission')) {
-                            $authorgroupcontroller->set_onlinetext_submission_for_coauthors($currentcoauthors, $data);
-                        }
 
                         // If notifications are on then send notifications to all new and currend coauthors.
                         if ($notification) {
@@ -455,7 +430,7 @@ class assign_submission_author extends assign_submission_plugin
 
                         return true;
                     } else if (isset($data->nocoauthors) && $data->nocoauthors == 1) {
-                        // Third (3rd) option - author perspective.
+                        // Option "No co authors" - author perspective.
 
                         $deletecoauthors = $currentcoauthors;
 
@@ -467,7 +442,7 @@ class assign_submission_author extends assign_submission_plugin
                     }
                 } else {
                     if (isset($data->selcoauthors) && $data->selcoauthors == 1) {
-                        // First (1st) option - coauthor perspective.
+                        // Option "Select new co authors" - coauthor perspective.
                         $userarr = array(
                             $userid
                         );
@@ -483,14 +458,8 @@ class assign_submission_author extends assign_submission_plugin
 
                         // Update or delete remaining author group.
                         if ($authorlist != '') {
-                            $authorgroupcontroller->update_author_group($updatecoauthors,
-                                    $submission->assignment,
-                                    $author,
-                                    $authorlist);
-                            $authorgroupcontroller->update_author_group($updateauthor,
-                                    $submission->assignment,
-                                    $author,
-                                    $authorlist);
+                            $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data);
+                            $authorgroupcontroller->update_author_group($updateauthor, $submission->assignment, $author, $authorlist, $data);
                         } else {
                             $authorgroupcontroller->delete_author_group($updatecoauthors, $submission->assignment);
                             $authorgroupcontroller->delete_author_group($updateauthor, $submission->assignment);
@@ -511,19 +480,12 @@ class assign_submission_author extends assign_submission_plugin
                         $authorlist = implode(',', $selectedcoauthors);
 
                         // Create new author group.
-                        $authorgroupcontroller->create_author_group($selectedcoauthors, $submission, $authorlist);
+                        $authorgroupcontroller->create_author_group($selectedcoauthors, $submission, $authorlist, $data);
 
                         $currentcoauthors = $selectedcoauthors;
 
                         // Update own author submission.
                         $submissioncontroller->update_author_submission($authorsubmission, $author, $authorlist);
-
-                        // If onlinetext plugin is enabled then update/create submissions.
-                        if (utilities::is_plugin_enabled($this->assignment->get_instance()->id,
-                                ASSIGNSUBMISSION_ONLINETEXT,
-                                'assignsubmission')) {
-                            $authorgroupcontroller->set_onlinetext_submission_for_coauthors($currentcoauthors, $data);
-                        }
 
                         // If notifications are on then send notifications to all new and currend coauthors.
                         if ($notification) {
@@ -535,8 +497,9 @@ class assign_submission_author extends assign_submission_plugin
                             $authorgroupcontroller->set_author_default($authorlist, $userid, $courseid);
                         }
                         return true;
+
                     } else if (isset($data->defcoauthors) && $data->defcoauthors == 1) {
-                        // Second (2nd) option - coauthor perspective.
+                        // Option "Save as new default co-authors in this course " - coauthor perspective.
 
                         $userarr = array(
                             $userid
@@ -553,14 +516,8 @@ class assign_submission_author extends assign_submission_plugin
 
                         // Update or delete remaining authorgroup.
                         if ($authorlist != '') {
-                            $authorgroupcontroller->update_author_group($updatecoauthors,
-                                    $submission->assignment,
-                                    $author,
-                                    $authorlist);
-                            $authorgroupcontroller->update_author_group($updateauthor,
-                                    $submission->assignment,
-                                    $author,
-                                    $authorlist);
+                            $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data);
+                            $authorgroupcontroller->update_author_group($updateauthor, $submission->assignment, $author, $authorlist, $data);
                         } else {
                             $authorgroupcontroller->delete_author_group($updatecoauthors, $submission->assignment);
                             $authorgroupcontroller->delete_author_group($updateauthor, $submission->assignment);
@@ -573,19 +530,12 @@ class assign_submission_author extends assign_submission_plugin
                         $authorlist = implode(',', $defaultcoauthors);
 
                         // Create new authorgroup by default.
-                        $authorgroupcontroller->create_author_group($defaultcoauthors, $submission, $authorlist);
+                        $authorgroupcontroller->create_author_group($defaultcoauthors, $submission, $authorlist, $data);
 
                         $currentcoauthors = $defaultcoauthors;
 
                         // Update own authorsubmission.
                         $submissioncontroller->update_author_submission($authorsubmission, $author, $authorlist);
-
-                        // If onlinetext plugin is enabled then update/create submissions.
-                        if (utilities::is_plugin_enabled($this->assignment->get_instance()->id,
-                                ASSIGNSUBMISSION_ONLINETEXT,
-                                'assignsubmission')) {
-                            $authorgroupcontroller->set_onlinetext_submission_for_coauthors($currentcoauthors, $data);
-                        }
 
                         // If notifications are on then send notifications to all new and currend coauthors.
                         if ($notification) {
@@ -593,7 +543,7 @@ class assign_submission_author extends assign_submission_plugin
                         }
                         return true;
                     } else if (isset($data->nocoauthors) && $data->nocoauthors == 1) {
-                        // Third (3rd) option - coauthor perspective.
+                        // Option "No co-authors" - coauthor perspective.
 
                         $userarr = array(
                             $userid
@@ -609,14 +559,8 @@ class assign_submission_author extends assign_submission_plugin
                         $authorlist = implode(',', $updatecoauthors);
 
                         // Update current author group.
-                        $authorgroupcontroller->update_author_group($updatecoauthors,
-                                $submission->assignment,
-                                $author,
-                                $authorlist);
-                        $authorgroupcontroller->update_author_group($updateauthor,
-                                $submission->assignment,
-                                $author,
-                                $authorlist);
+                        $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data);
+                        $authorgroupcontroller->update_author_group($updateauthor, $submission->assignment, $author, $authorlist, $data);
 
                         // Delete own author submission.
                         $submissioncontroller->delete_author_submission($userid, $submission->assignment);
@@ -625,7 +569,7 @@ class assign_submission_author extends assign_submission_plugin
                     }
                 }
 
-            } else {
+            } else { // Create new author submission.
 
                 if (isset($data->selcoauthors) && $data->selcoauthors == 1) {
 
@@ -640,15 +584,8 @@ class assign_submission_author extends assign_submission_plugin
                     $authorlist = implode(',', $currentcoauthors);
 
                     // Create new authorgroup.
-                    $authorgroupcontroller->create_author_group($currentcoauthors, $submission, $authorlist);
+                    $authorgroupcontroller->create_author_group($currentcoauthors, $submission, $authorlist, $data);
                     $submissioncontroller->create_author_submission($submission->assignment, $submission->id, $author, $authorlist);
-
-                    // If onlinetext plugin is enabled then update/create submissions.
-                    if (utilities::is_plugin_enabled($this->assignment->get_instance()->id,
-                            ASSIGNSUBMISSION_ONLINETEXT,
-                            'assignsubmission')) {
-                        $authorgroupcontroller->set_onlinetext_submission_for_coauthors($currentcoauthors, $data);
-                    }
 
                     // If notifications are on then send notifications to all new and currend coauthors.
                     if ($notification) {
@@ -662,23 +599,15 @@ class assign_submission_author extends assign_submission_plugin
                     return true;
 
                 } else if (isset($data->defcoauthors) && $data->defcoauthors == 1) {
-                    // Second (2nd) option - new authorgroup like the default group.
-
+                    // Option "Save as new default co-authors in this course " - new authorgroup like the default group.
                     $currentcoauthors = $authorgroupcontroller->get_default_coauthors($userid, $courseid);
 
                     $author = $userid;
                     $authorlist = implode(',', $currentcoauthors);
 
                     // Create new authorgroup.
-                    $authorgroupcontroller->create_author_group($currentcoauthors, $submission, $authorlist);
+                    $authorgroupcontroller->create_author_group($currentcoauthors, $submission, $authorlist, $data);
                     $submissioncontroller->create_author_submission($submission->assignment, $submission->id, $author, $authorlist);
-
-                    // If onlinetext plugin is enabled then update/create submissions.
-                    if (utilities::is_plugin_enabled($this->assignment->get_instance()->id,
-                            ASSIGNSUBMISSION_ONLINETEXT,
-                            'assignsubmission')) {
-                        $authorgroupcontroller->set_onlinetext_submission_for_coauthors($currentcoauthors, $data);
-                    }
 
                     // If notifications are on then send notifications to all new and currend coauthors.
                     if ($notification) {

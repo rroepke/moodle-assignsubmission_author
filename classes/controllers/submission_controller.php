@@ -40,6 +40,7 @@ class submission_controller {
      * @throws \dml_exception
      */
     public function create_submission($userid, $submission) {
+
         global $DB;
         $newsubmission = new stdClass();
         $newsubmission->assignment = $submission->assignment;
@@ -58,7 +59,7 @@ class submission_controller {
      *
      * @param int $userid
      * @param int $assignment
-     * @return Ambigous <mixed, stdClass, false, boolean>
+     * @return <stdClass or false>
      * @throws \dml_exception
      */
     public function get_submission($userid, $assignment) {
@@ -108,8 +109,8 @@ class submission_controller {
     /**
      * Delete author submission record
      *
-     * @param unknown $userid
-     * @param unknown $assignment
+     * @param number $userid
+     * @param number $assignment the id of the assignment ind mdl_assign
      * @return boolean
      * @throws \dml_exception
      */
@@ -126,7 +127,7 @@ class submission_controller {
      *
      * @param int $assignment
      * @param int $submission
-     * @return Ambigous <mixed, stdClass, false, boolean>
+     * @return <stdClass or false>
      * @throws \dml_exception
      */
     public function get_author_submission($assignment, $submission) {
