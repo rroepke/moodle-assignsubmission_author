@@ -792,15 +792,17 @@ class assign_submission_author extends assign_submission_plugin
 
         if ($submission) {
             $authorsubmission = $submissioncontroller->get_author_submission($assignmentid, $submission->id);
-            $allauthorids = explode(',', $authorsubmission->author . ',' . $authorsubmission->authorlist);
+            if ($authorsubmission != false) { // If co authors are even used.
+                $allauthorids = explode(',', $authorsubmission->author . ',' . $authorsubmission->authorlist);
 
-            // Also delete this submission for every other author.
-            foreach ($allauthorids as $authorid) {
-                if ($authorid != $USER->id) { // The submission was already deleted for this user.
-                    $submissiontodelete = $submissioncontroller->get_submission($authorid, $assignmentid);
-                    foreach ($this->assignment->get_submission_plugins() as $plugin) {
-                        if ($plugin->is_enabled() && $plugin->is_visible() && $plugin->get_type() != 'author') {
-                            $plugin->remove($submissiontodelete);
+                // Also delete this submission for every other author.
+                foreach ($allauthorids as $authorid) {
+                    if ($authorid != $USER->id) { // The submission was already deleted for this user.
+                        $submissiontodelete = $submissioncontroller->get_submission($authorid, $assignmentid);
+                        foreach ($this->assignment->get_submission_plugins() as $plugin) {
+                            if ($plugin->is_enabled() && $plugin->is_visible() && $plugin->get_type() != 'author' && $submissiontodelete != false) {
+                                $plugin->remove($submissiontodelete);
+                            }
                         }
                     }
                 }
