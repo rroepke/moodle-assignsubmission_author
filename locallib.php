@@ -131,6 +131,14 @@ class assign_submission_author extends assign_submission_plugin
         $mform->setDefault('assignsubmissionauthor_duplicatesubmission', isset($settings->duplicatesubmission) ? $settings->duplicatesubmission : true);
         $mform->addHelpButton('assignsubmissionauthor_duplicatesubmission', 'duplicatesubmission', 'assignsubmission_author');
         $mform->disabledIf('assignsubmissionauthor_duplicatesubmission', 'assignsubmission_author_enabled', 'notchecked');
+
+        // Display option to remove the submissions of removed co authors.
+        $mform->addElement('checkbox', 'assignsubmissionauthor_removesubmission', '', get_string('removesubmission', 'assignsubmission_author'));
+        $mform->setType('assignsubmissionauthor_removesubmission', PARAM_BOOL);
+        $mform->setDefault('assignsubmissionauthor_removesubmission', isset($settings->removesubmission) ? $settings->removesubmission : true);
+        $mform->addHelpButton('assignsubmissionauthor_removesubmission', 'removesubmission', 'assignsubmission_author');
+        $mform->disabledIf('assignsubmissionauthor_removesubmission', 'assignsubmission_author_enabled', 'notchecked');
+        $mform->disabledIf('assignsubmissionauthor_removesubmission', 'assignsubmissionauthor_duplicatesubmission', 'notchecked');
     }
 
     /**
@@ -159,6 +167,9 @@ class assign_submission_author extends assign_submission_plugin
 
         $checkgroupsused = isset($data->assignsubmissionauthor_duplicatesubmission);
         $this->set_config('duplicatesubmission', $checkgroupsused ? $data->assignsubmissionauthor_duplicatesubmission : 0);
+
+        $checkgroupsused = isset($data->assignsubmissionauthor_removesubmission);
+        $this->set_config('removesubmission', $checkgroupsused ? $data->assignsubmissionauthor_removesubmission : 0);
         return true;
     }
 
@@ -257,7 +268,7 @@ class assign_submission_author extends assign_submission_plugin
         $mform->disabledIf('groupcoauthors', 'selcoauthors', 'checked');
         $mform->disabledIf('groupcoauthors', 'nocoauthors', 'checked');
 
-        // If already in authorgroup then 4th option.
+        // Show existing author group for co authors.
         if ($alreadyinauthorgroup) {
             $mform->setDefault('groupcoauthors', 'checked');
             $mform->addElement('checkbox', 'groupcoauthors', '', get_string('choose_group', 'assignsubmission_author'), 1);
@@ -268,12 +279,35 @@ class assign_submission_author extends assign_submission_plugin
             $mform->setDefault('selcoauthors', 'checked');
         }
 
-        $mform->addElement('header',
-                'header',
-                get_string('header', 'assignsubmission_author'));
+        $mform->addElement('header','header',get_string('header', 'assignsubmission_author'));
 
-        // Display 1st option to select co authors.
-        $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_coauthors', 'assignsubmission_author'), 1);
+        // Select the right string to display the "choose new co authors" option, depending on the settings done by the teacher.
+        $settings = $this->get_config();
+        if ($alreadyinauthorgroup) {
+            // Option "Choose new co authors" - co author perspective
+            if (isset($settings->duplicatesubmission) && $settings->duplicatesubmission && isset($settings->removesubmission) && $settings->removesubmission) {
+                // Submissions are both duplicated and deleted
+                $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_new_coauthors_remove', 'assignsubmission_author'), 1);
+            } elseif (isset($settings->duplicatesubmission) && $settings->duplicatesubmission) {
+                // Submissions are only duplicated, but never deleted
+                $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_new_coauthors_no_remove', 'assignsubmission_author'), 1);
+            } else {
+                // Submissions are not duplicated so there are is no extra explanation.
+                $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_new_coauthors', 'assignsubmission_author'), 1);
+            }
+        } else {
+            // Option "Choose co authors" - author perspective
+            if (isset($settings->duplicatesubmission) && $settings->duplicatesubmission && isset($settings->removesubmission) && $settings->removesubmission) {
+                // Submissions are both duplicated and deleted
+                $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_coauthors_remove', 'assignsubmission_author'), 1);
+            } elseif (isset($settings->duplicatesubmission) && $settings->duplicatesubmission) {
+                // Submissions are only duplicated, but never deleted
+                $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_coauthors_no_remove', 'assignsubmission_author'), 1);
+            } else {
+                // Submissions are not duplicated so there are is no extra explanation.
+                $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_coauthors', 'assignsubmission_author'), 1);
+            }
+        }
 
         if (count($possiblecoauthors) != 0) {
             // Define content of choice boxes.
@@ -387,15 +421,18 @@ class assign_submission_author extends assign_submission_plugin
                         // Get new selected coauthors.
                         $selectedcoauthors = utilities::get_selected_coauthors($data);
 
-                        // If no new selected coauthors selected, delete current authorgroup.
+                        // If no new selected coauthors selected, delete current authorgroup. This is like choosing the no co authors option.
                         if (count($selectedcoauthors) == 0) {
                             $deletecoauthors = $currentcoauthors;
 
+                            if (isset($settings->removesubmission) && $settings->removesubmission) {
+                                $this->remove($submission);
+                            }
                             $authorgroupcontroller->delete_author_group($deletecoauthors, $submission->assignment);
 
                             $submissioncontroller->delete_author_submission($userid, $submission->assignment);
 
-                        } else { // There are new coauthors selected, update author group.
+                        } else { // There are new coauthors selected. Update author group.
 
                             // Distinguish between new coauthors, deleted coauthors, current coauthors.
                             $deletecoauthors = array_diff($currentcoauthors, $selectedcoauthors);
@@ -403,7 +440,10 @@ class assign_submission_author extends assign_submission_plugin
                             $updatecoauthors = array_diff($selectedcoauthors, $newcoauthors);
                             $currentcoauthors = $selectedcoauthors;
 
-                            // Delete author group with deleted coauthors.
+                            // Delete author group with deleted coauthors and remove thei submission if set.
+                            if (isset($settings->removesubmission) && $settings->removesubmission) {
+                                $this->remove($submission);
+                            }
                             $authorgroupcontroller->delete_author_group($deletecoauthors, $submission->assignment);
 
                             $author = $authorsubmission->author;
@@ -442,6 +482,9 @@ class assign_submission_author extends assign_submission_plugin
                         $currentcoauthors = $defaultcoauthors;
 
                         // Delete author group with deleted coauthors.
+                        if (isset($settings->removesubmission) && $settings->removesubmission) {
+                            $this->remove($submission);
+                        }
                         $authorgroupcontroller->delete_author_group($deletecoauthors, $submission->assignment);
 
                         $author = $authorsubmission->author;
@@ -466,6 +509,9 @@ class assign_submission_author extends assign_submission_plugin
                         $deletecoauthors = $currentcoauthors;
 
                         // Delete authorgroup.
+                        if (isset($settings->removesubmission) && $settings->removesubmission) {
+                            $this->remove($submission);
+                        }
                         $authorgroupcontroller->delete_author_group($deletecoauthors, $submission->assignment);
 
                         $submissioncontroller->delete_author_submission($userid, $submission->assignment);
@@ -492,6 +538,9 @@ class assign_submission_author extends assign_submission_plugin
                             $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data, $settings);
                             $authorgroupcontroller->update_author_group($updateauthor, $submission->assignment, $author, $authorlist, $data, $settings);
                         } else {
+                            if (isset($settings->removesubmission) && $settings->removesubmission) {
+                                $this->remove($submission);
+                            }
                             $authorgroupcontroller->delete_author_group($updatecoauthors, $submission->assignment);
                             $authorgroupcontroller->delete_author_group($updateauthor, $submission->assignment);
                         }
@@ -501,6 +550,9 @@ class assign_submission_author extends assign_submission_plugin
                         if (count($selectedcoauthors) == 0) {
 
                             $deletecoauthors = $currentcoauthors;
+                            if (isset($settings->removesubmission) && $settings->removesubmission) {
+                                $this->remove($submission);
+                            }
                             $authorgroupcontroller->delete_author_group($deletecoauthors, $submission->assignment);
                             $submissioncontroller->delete_author_submission($userid, $submission->assignment);
 
@@ -550,6 +602,9 @@ class assign_submission_author extends assign_submission_plugin
                             $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data, $settings);
                             $authorgroupcontroller->update_author_group($updateauthor, $submission->assignment, $author, $authorlist, $data, $settings);
                         } else {
+                            if (isset($settings->removesubmission) && $settings->removesubmission) {
+                                $this->remove($submission);
+                            }
                             $authorgroupcontroller->delete_author_group($updatecoauthors, $submission->assignment);
                             $authorgroupcontroller->delete_author_group($updateauthor, $submission->assignment);
                         }
@@ -766,7 +821,7 @@ class assign_submission_author extends assign_submission_plugin
     }
 
     /**
-     * Send notifications to all coauthors
+     * Send notifications to all coauthors when they are added to a co author group.
      *
      * @param int $author
      * @param int[] $coauthors
