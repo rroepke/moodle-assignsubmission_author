@@ -43,6 +43,7 @@ $string['noteamsubmission'] = 'Der Abgabetyp "Autorengruppen" kann nicht gemeins
 $string['subject'] = 'Abgabe als Autorengruppe im Kurs <a href="{$a->courseurl}">{$a->coursename}</a>';
 $string['message'] = '{$a->username} hat Sie in Aufgabe <a href="{$a->assignmenturl}">{$a->assignmentname}</a> als Co-Autor eingetragen.';
 
+// Mod settings for each instance.
 $string['maxauthors'] = 'Max. Anzahl Autoren pro Gruppe';
 $string['maxauthors_help'] = 'Die maximale Anzahl an Autoren pro Gruppe beinhaltet den Autor sowie die Co-Autoren, z. B. bedeutet "1", dass keine Co-Autoren zulässig sind, "2" das ein weiterer Co-Autor zulässig ist.';
 $string['ingroupsonly'] = 'Nur in der selben Gruppe';
@@ -51,6 +52,8 @@ $string['notification'] = 'Benachrichtung aller Co-Autoren';
 $string['notification_help'] = 'Wenn diese Option ausgewählt ist, werden alle Co-Autoren bei Abgabe benachrichtigt';
 $string['groupsused'] = 'Gruppenmodus aktiv?';
 $string['groupsused_help'] = 'Ist der Gruppenmodus aktiviert und diese Option wird ausgewählt, dann wird zur Nutzung von Autorengruppen vorausgesetzt, dass der Teilnehmer in eine Gruppe eingetragen ist. Ist er es nicht, kann er keine Autorengruppe auswählen.';
+$string['displaymail'] = 'Mails von Nutzern neben ihren Namen anzeigen';
+$string['displaymail_help'] = "Dies hilft Benutzern, ihre gewünschten Co-Autoren zu identifizieren, wenn es mehrfach den gleichen Namen gibt. Bitte beachten Sie die Privatsphäre der Nutzer.";
 $string['asdefault'] = 'Als neue Standard-Co-Autoren für diesen Kurs speichern';
 
 $string['default'] = 'Standardmäßig aktiviert';

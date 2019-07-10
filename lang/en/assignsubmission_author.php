@@ -43,6 +43,7 @@ $string['noteamsubmission'] = 'The submission type "Author groups" cannot be use
 $string['subject'] = 'Author group submission in course <a href="{$a->courseurl}">{$a->coursename}</a>';
 $string['message'] = '{$a->username} has done a submission for the assignment <a href="{$a->assignmenturl}">{$a->assignmentname}</a> and added you as a co-author.';
 
+// Mod settings for each instance.
 $string['maxauthors'] = 'Maximum number of authors';
 $string['maxauthors_help'] = 'The maximum number of author includes the user himself, e.g. "1" means no other co-authors are allowed, while "2" means one co-author beside the user himself';
 $string['ingroupsonly'] = 'Only in the same group';
@@ -51,6 +52,8 @@ $string['notification'] = 'Inform all co-authors';
 $string['notification_help'] = 'If enabled, then all co-authors will get a message after a submission';
 $string['groupsused'] = 'Groups enabled?';
 $string['groupsused_help'] = 'If groups and this option are enabled, only members of groups are able to choose co-authors. Others won\'t be able to choose co-authors.';
+$string['displaymail'] = 'Display Mails of users alongside their names';
+$string['displaymail_help'] = "This helps users identify their desired co authors when there are multiples of same names. Please be aware of users' privacy.";
 $string['asdefault'] = 'Save as new default co-authors in this course';
 
 $string['default'] = 'Enabled by default';

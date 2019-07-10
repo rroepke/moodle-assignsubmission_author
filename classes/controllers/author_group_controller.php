@@ -131,11 +131,10 @@ class author_group_controller {
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    public function get_possible_co_authors($courseid, $userid, $ingroupsonly, $assignment, $groupsused) {
+    public function get_possible_co_authors($courseid, $userid, $ingroupsonly, $assignment, $groupsused, $displaymail) {
         $submissioncontroller = $this->submissioncontroller;
 
         if ($groupsused) {
-
             // Get right groups -> all or user-specific ones.
             if ($ingroupsonly) {
                 $groups = groups_get_all_groups($courseid, $userid);
@@ -159,11 +158,17 @@ class author_group_controller {
                     if (!$bool || $submission->status != 'submitted') {
                         $authorsubmission = $submissioncontroller->get_author_submission($assignment, $submission->id);
                         if (!($authorsubmission && $authorsubmission->author != $userid)) {
-                            $coauthors[$r->id] = fullname($r).', '.$r->email;
+                            $coauthors[$r->id] = fullname($r);
+                            if ($displaymail) {
+                                $coauthors[$r->id] .= ', '.$r->email;
+                            }
                         }
                     }
                 } else {
-                    $coauthors[$id] = fullname($r).', '.$r->email;
+                    $coauthors[$id] = fullname($r);
+                    if ($displaymail) {
+                        $coauthors[$id] .= ', '.$r->email;
+                    }
                 }
                 $seen[$id] = '';
             }
@@ -194,11 +199,17 @@ class author_group_controller {
                     if (!$bool || $submission->status != 'submitted') {
                         $authorsubmission = $submissioncontroller->get_author_submission($assignment, $submission->id);
                         if (!($authorsubmission && $authorsubmission->author != $userid)) {
-                            $coauthors[$id] = fullname($r).', '.$r->email;
+                            $coauthors[$id] = fullname($r);
+                            if ($displaymail) {
+                                $coauthors[$id] .= ', '.$r->email;
+                            }
                         }
                     }
                 } else {
-                    $coauthors[$id] = fullname($r).', '.$r->email;
+                    $coauthors[$id] = fullname($r);
+                    if ($displaymail) {
+                        $coauthors[$id] .= ', '.$r->email;
+                    }
                 }
             }
         }

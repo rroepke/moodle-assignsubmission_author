@@ -68,44 +68,59 @@ class assign_submission_author extends assign_submission_plugin
      */
     public function get_settings(MoodleQuickForm $mform) {
         // Get config infos.
-        $defaultmaxauthors = $this->get_config('maxauthors');
-        $defaultgroupsused = $this->get_config('groupsused');
-        $defaultingroupsonly = $this->get_config('ingroupsonly');
-        $defaultnotification = $this->get_config('notification');
+        $settings = $this->get_config();
 
         // Generate maxauthors setting.
         $options = array();
         for ($i = 1; $i <= ASSIGNSUBMISSIONAUTHOR_MAXAUTHORS; $i++) {
             $options[$i] = $i;
         }
+
+        // Add a new header for this plugin. Only the "enabled" setting is part of the submission types above.
+        $mform->addElement('header', 'assignsubmissionauthor_header', get_string('pluginname', 'assignsubmission_author'));
+        $mform->disabledIf('assignsubmissionauthor_header', 'assignsubmission_author_enabled', 'notchecked');
+        if ($settings->enabled) { // Automatically expand it if the plugin is used.
+            $mform->setExpanded('assignsubmissionauthor_header');
+        }
+
+        // Explanation for this part.
+        $mform->addElement('static', 'gradesexistmsg', 'some html explaining that author groups need to be enabled on the left', '');
+
         // Display maxauthors setting.
-        $name = get_string('maxauthors', 'assignsubmission_author');
-        $mform->addElement('select', 'assignsubmissionauthor_maxauthors', $name, $options);
+        $mform->addElement('select', 'assignsubmissionauthor_maxauthors', get_string('maxauthors', 'assignsubmission_author'), $options);
+        $mform->setType('assignsubmissionauthor_notification', PARAM_INT);
         $mform->addHelpButton('assignsubmissionauthor_maxauthors', 'maxauthors', 'assignsubmission_author');
-        $mform->setDefault('assignsubmissionauthor_maxauthors', $defaultmaxauthors);
+        $mform->setDefault('assignsubmissionauthor_maxauthors', $settings->maxauthors);
         $mform->disabledIf('assignsubmissionauthor_maxauthors', 'assignsubmission_author_enabled', 'notchecked');
 
         // Display notification setting.
-        $name = get_string('notification', 'assignsubmission_author');
-        $mform->addElement('checkbox', 'assignsubmissionauthor_notification', $name, '', 0);
-        $mform->setDefault('assignsubmissionauthor_notification', $defaultnotification);
+        $mform->addElement('checkbox', 'assignsubmissionauthor_notification', get_string('notification', 'assignsubmission_author'), '', 0);
+        $mform->setType('assignsubmissionauthor_notification', PARAM_BOOL);
+        $mform->setDefault('assignsubmissionauthor_notification', isset($settings->notification) ? $settings->notification : true);
         $mform->addHelpButton('assignsubmissionauthor_notification', 'notification', 'assignsubmission_author');
         $mform->disabledIf('assignsubmissionauthor_notification', 'assignsubmission_author_enabled', 'notchecked');
 
         // Display groupsused setting.
-        $name = get_string('groupsused', 'assignsubmission_author');
-        $mform->addElement('checkbox', 'assignsubmissionauthor_groupsused', $name, '', 0);
-        $mform->setDefault('assignsubmissionauthor_groupsused', $defaultgroupsused);
+        $mform->addElement('checkbox', 'assignsubmissionauthor_groupsused', get_string('groupsused', 'assignsubmission_author'), '', 0);
+        $mform->setType('assignsubmissionauthor_groupsused', PARAM_BOOL);
+        $mform->setDefault('assignsubmissionauthor_groupsused', $settings->groupsused);
         $mform->addHelpButton('assignsubmissionauthor_groupsused', 'groupsused', 'assignsubmission_author');
         $mform->disabledIf('assignsubmissionauthor_groupsused', 'assignsubmission_author_enabled', 'notchecked');
 
         // Display ingroupsonly setting.
-        $name = get_string('ingroupsonly', 'assignsubmission_author');
-        $mform->addElement('checkbox', 'assignsubmissionauthor_ingroupsonly', $name, '', 0);
-        $mform->setDefault('assignsubmissionauthor_ingroupsonly', $defaultingroupsonly);
+        $mform->addElement('checkbox', 'assignsubmissionauthor_ingroupsonly', get_string('ingroupsonly', 'assignsubmission_author'), '', 0);
+        $mform->setType('assignsubmissionauthor_ingroupsonly', PARAM_BOOL);
+        $mform->setDefault('assignsubmissionauthor_ingroupsonly', $settings->ingroupsonly);
         $mform->addHelpButton('assignsubmissionauthor_ingroupsonly', 'ingroupsonly', 'assignsubmission_author');
         $mform->disabledIf('assignsubmissionauthor_ingroupsonly', 'assignsubmissionauthor_groupsused', 'notchecked');
         $mform->disabledIf('assignsubmissionauthor_ingroupsonly', 'assignsubmission_author_enabled', 'notchecked');
+
+        // Display option to show emails of user in selection.
+        $mform->addElement('checkbox', 'assignsubmissionauthor_displaymail', '', get_string('displaymail', 'assignsubmission_author'));
+        $mform->setType('assignsubmissionauthor_displaymail', PARAM_BOOL);
+        $mform->setDefault('assignsubmissionauthor_displaymail', isset($settings->displaymail) ? $settings->displaymail : true);
+        $mform->addHelpButton('assignsubmissionauthor_displaymail', 'displaymail', 'assignsubmission_author');
+        $mform->disabledIf('assignsubmissionauthor_displaymail', 'assignsubmission_author_enabled', 'notchecked');
     }
 
     /**
@@ -117,18 +132,20 @@ class assign_submission_author extends assign_submission_plugin
     public function save_settings(stdClass $data) {
         // Set config info.
         $checkmaxauthors = isset($data->assignsubmissionauthor_maxauthors);
-        $this->set_config('maxauthors',
-            $checkmaxauthors ? $data->assignsubmissionauthor_maxauthors : 0);
+        $this->set_config('maxauthors', $checkmaxauthors ? $data->assignsubmissionauthor_maxauthors : 0);
+
         $checkgroupsused = isset($data->assignsubmissionauthor_groupsused) && $data->assignsubmissionauthor_groupsused == 1;
         $checkingroupsonly = isset($data->assignsubmissionauthor_ingroupsonly);
-        $this->set_config('ingroupsonly',
-            $checkgroupsused ? ($checkingroupsonly ? $data->assignsubmissionauthor_ingroupsonly : 0) : 0);
+        $this->set_config('ingroupsonly', $checkgroupsused ? ($checkingroupsonly ? $data->assignsubmissionauthor_ingroupsonly : 0) : 0);
+
         $checknotification = isset($data->assignsubmissionauthor_notification);
-        $this->set_config('notification',
-            $checknotification ? $data->assignsubmissionauthor_notification : 0);
+        $this->set_config('notification', $checknotification ? $data->assignsubmissionauthor_notification : 0);
+
         $checkgroupsused = isset($data->assignsubmissionauthor_groupsused);
-        $this->set_config('groupsused',
-            $checkgroupsused ? $data->assignsubmissionauthor_groupsused : 0);
+        $this->set_config('groupsused', $checkgroupsused ? $data->assignsubmissionauthor_groupsused : 0);
+
+        $checkgroupsused = isset($data->assignsubmissionauthor_displaymail);
+        $this->set_config('displaymail', $checkgroupsused ? $data->assignsubmissionauthor_displaymail : 0);
         return true;
     }
 
@@ -192,8 +209,8 @@ class assign_submission_author extends assign_submission_plugin
         $groupsused = $this->get_config('groupsused');
 
         // Get possible coauthors.
-        $possiblecoauthors = $authorgroupcontroller->get_possible_co_authors($courseid,
-                $userid, $ingroupsonly, $assignment, $groupsused);
+        $displaymail = $this->get_config('displaymail');
+        $possiblecoauthors = $authorgroupcontroller->get_possible_co_authors($courseid, $userid, $ingroupsonly, $assignment, $groupsused, $displaymail);
 
         $userarr = null;
         $userarr[$userid] = '';
