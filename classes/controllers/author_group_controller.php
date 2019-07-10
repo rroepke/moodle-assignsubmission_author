@@ -127,7 +127,7 @@ class author_group_controller {
      * @param boolean $ingroupsonly
      * @param int $assignment
      * @param $groupsused
-     * @return array:
+     * @return array with [userid] => [Name, email] for every possible co author
      * @throws \coding_exception
      * @throws \dml_exception
      */
@@ -159,11 +159,11 @@ class author_group_controller {
                     if (!$bool || $submission->status != 'submitted') {
                         $authorsubmission = $submissioncontroller->get_author_submission($assignment, $submission->id);
                         if (!($authorsubmission && $authorsubmission->author != $userid)) {
-                            $coauthors[$r->id] = fullname($r);
+                            $coauthors[$r->id] = fullname($r).', '.$r->email;
                         }
                     }
                 } else {
-                    $coauthors[$id] = fullname($r);
+                    $coauthors[$id] = fullname($r).', '.$r->email;
                 }
                 $seen[$id] = '';
             }
@@ -194,11 +194,11 @@ class author_group_controller {
                     if (!$bool || $submission->status != 'submitted') {
                         $authorsubmission = $submissioncontroller->get_author_submission($assignment, $submission->id);
                         if (!($authorsubmission && $authorsubmission->author != $userid)) {
-                            $coauthors[$id] = fullname($r);
+                            $coauthors[$id] = fullname($r).', '.$r->email;
                         }
                     }
                 } else {
-                    $coauthors[$id] = fullname($r);
+                    $coauthors[$id] = fullname($r).', '.$r->email;
                 }
             }
         }
