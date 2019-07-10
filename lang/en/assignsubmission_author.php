@@ -44,6 +44,7 @@ $string['subject'] = 'Author group submission in course <a href="{$a->courseurl}
 $string['message'] = '{$a->username} has done a submission for the assignment <a href="{$a->assignmenturl}">{$a->assignmentname}</a> and added you as a co-author.';
 
 // Mod settings for each instance.
+$string['setting_explanation'] = 'These settings are disabled as long as the "'.$string['author'].'" checkbox is not set in the "{$a->submisiontypesstring}" section above.';
 $string['maxauthors'] = 'Maximum number of authors';
 $string['maxauthors_help'] = 'The maximum number of author includes the user himself, e.g. "1" means no other co-authors are allowed, while "2" means one co-author beside the user himself';
 $string['ingroupsonly'] = 'Only in the same group';

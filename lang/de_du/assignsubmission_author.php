@@ -44,6 +44,7 @@ $string['subject'] = 'Abgabe als Autorengruppe im Kurs <a href="{$a->courseurl}"
 $string['message'] = '{$a->username} hat dich in Aufgabe <a href="{$a->assignmenturl}">{$a->assignmentname}</a> als Co-Autor eingetragen.';
 
 // Mod settings for each instance.
+$string['setting_explanation'] = 'Diese Einstellungen sind deaktiviert, wenn die "'.$string['author'].'" Checkbox in dem Abschnitt "{$a->submisiontypesstring}" oben nicht gesetzt ist.';
 $string['maxauthors'] = 'Max. Anzahl Autoren pro Gruppe';
 $string['maxauthors_help'] = 'Die maximale Anzahl an Autoren pro Gruppe beinhaltet den Autor sowie die Co-Autoren, z. B. bedeutet "1", dass keine Co-Autoren zulässig sind, "2" das ein weiterer Co-Autor zulässig ist.';
 $string['ingroupsonly'] = 'Nur in der selben Gruppe';

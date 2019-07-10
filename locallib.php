@@ -84,7 +84,10 @@ class assign_submission_author extends assign_submission_plugin
         }
 
         // Explanation for this part.
-        $mform->addElement('static', 'gradesexistmsg', 'some html explaining that author groups need to be enabled on the left', '');
+        $a = new stdClass();
+        $a->submisiontypesstring = get_string('submissiontypes', 'assign');
+        $explanation = get_string('setting_explanation', 'assignsubmission_author', $a);
+        $mform->addElement('static', '', $explanation);
 
         // Display maxauthors setting.
         $mform->addElement('select', 'assignsubmissionauthor_maxauthors', get_string('maxauthors', 'assignsubmission_author'), $options);
