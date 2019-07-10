@@ -54,8 +54,13 @@ $string['groupsused'] = 'Gruppenmodus aktiv?';
 $string['groupsused_help'] = 'Ist der Gruppenmodus aktiviert und diese Option wird ausgewählt, dann wird zur Nutzung von Autorengruppen vorausgesetzt, dass der Teilnehmer in eine Gruppe eingetragen ist. Ist er es nicht, kann er keine Autorengruppe auswählen.';
 $string['displaymail'] = 'Mails von Nutzern neben ihren Namen anzeigen';
 $string['displaymail_help'] = "Dies hilft Benutzern, ihre gewünschten Co-Autoren zu identifizieren, wenn es mehrfach den gleichen Namen gibt. Bitte beachten Sie die Privatsphäre der Nutzer.";
-$string['asdefault'] = 'Als neue Standard-Co-Autoren für diesen Kurs speichern';
+$string['duplicatesubmission'] ='Dupliziere die Abgabe für alle Gruppenmitglieder';
+$string['duplicatesubmission_help'] ='Wenn aktiviert, wird die Abgabe des Originalautors für jeden Mitautor dupliziert und umgekehrt'
+.'Auf diese Weise können alle Autoren einer Co-Autorengruppe die Abgabe sehen und bearbeiten. <br><br>'
+.'Beachten Sie, dass diese Einstellung bedeutet, dass ein Benutzer seine Einreichung für jeden Benutzer im Kurs vervielfachen kann, wenn er durch alle verfügbaren Co-Autoren jongliert'
+.'Es führt auch zu Falschanzeigen bei Plagiat-Plugins, weil die Benutzer genau die gleiche Abgabe haben.';
 
+$string['asdefault'] = 'Als neue Standard-Co-Autoren für diesen Kurs speichern';
 $string['default'] = 'Standardmäßig aktiviert';
 $string['default_help'] = 'Die gewählte Methode für die Abgabe von Lösungen wird für alle neuen Aufgaben voreingestellt.';
 $string['enabled'] = 'Autorengruppen';

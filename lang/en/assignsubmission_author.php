@@ -54,8 +54,13 @@ $string['groupsused'] = 'Groups enabled?';
 $string['groupsused_help'] = 'If groups and this option are enabled, only members of groups are able to choose co-authors. Others won\'t be able to choose co-authors.';
 $string['displaymail'] = 'Display Mails of users alongside their names';
 $string['displaymail_help'] = "This helps users identify their desired co authors when there are multiples of same names. Please be aware of users' privacy.";
-$string['asdefault'] = 'Save as new default co-authors in this course';
+$string['duplicatesubmission'] = 'Duplicate submission for all group members';
+$string['duplicatesubmission_help'] = 'When enabled, the submission from the original author will be duplicated for every co author and vise versa.'
+.'This way all authors of a co author group can see and edit the submission. <br><br>'
+.'Be aware that this setting means a user can multiply his/her submission for every user in the course if he/she juggles through all available co authors.'
+.'It also breaks plagiarism plugins because the users have exactly the same submission.';
 
+$string['asdefault'] = 'Save as new default co-authors in this course';
 $string['default'] = 'Enabled by default';
 $string['default_help'] = 'If set, this submission method will be enabled by default for all new assignments.';
 $string['enabled'] = 'Multiple Authors';

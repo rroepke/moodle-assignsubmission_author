@@ -57,7 +57,7 @@ class author_group_controller {
      * @param string $authorlist
      * @throws \dml_exception
      */
-    public function create_author_group($coauthors, $submission, $authorlist, $data) {
+    public function create_author_group($coauthors, $submission, $authorlist, $data, $settings) {
         global $CFG, $DB;
         $submissioncontroller = $this->submissioncontroller;
         $assignment = $submission->assignment;
@@ -80,7 +80,9 @@ class author_group_controller {
                 $DB->update_record('assign_submission', $coauthorsubmission);
             }
 
-            $this->duplicate_submission($coauthorsubmission, $data);
+            if (isset($settings->duplicatesubmission) && $settings->duplicatesubmission) {
+                $this->duplicate_submission($coauthorsubmission, $data);
+            }
 
             $id = $coauthorsubmission->id;
             $submissioncontroller->create_author_submission($assignment, $id, $author, $authorlist);
@@ -97,14 +99,16 @@ class author_group_controller {
      * @param string $authorlist
      * @throws \dml_exception
      */
-    public function update_author_group($coauthors, $assignment, $author, $authorlist, $data) {
+    public function update_author_group($coauthors, $assignment, $author, $authorlist, $data, $settings) {
         global $DB;
         $submissioncontroller = $this->submissioncontroller;
         foreach ($coauthors as $coauthor) {
             $coauthorsubmission = $submissioncontroller->get_submission($coauthor, $assignment);
             if ($coauthorsubmission) {
 
-                $this->duplicate_submission($coauthorsubmission, $data);
+                if (isset($settings->duplicatesubmission) && $settings->duplicatesubmission) {
+                    $this->duplicate_submission($coauthorsubmission, $data);
+                }
 
                 // Update the coauthor table.
                 $submissionid = $coauthorsubmission->id;

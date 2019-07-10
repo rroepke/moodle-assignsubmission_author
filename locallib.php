@@ -121,6 +121,13 @@ class assign_submission_author extends assign_submission_plugin
         $mform->setDefault('assignsubmissionauthor_displaymail', isset($settings->displaymail) ? $settings->displaymail : true);
         $mform->addHelpButton('assignsubmissionauthor_displaymail', 'displaymail', 'assignsubmission_author');
         $mform->disabledIf('assignsubmissionauthor_displaymail', 'assignsubmission_author_enabled', 'notchecked');
+
+        // Display option to duplicate each submission so co authors can see and edit them.
+        $mform->addElement('checkbox', 'assignsubmissionauthor_duplicatesubmission', '', get_string('duplicatesubmission', 'assignsubmission_author'));
+        $mform->setType('assignsubmissionauthor_duplicatesubmission', PARAM_BOOL);
+        $mform->setDefault('assignsubmissionauthor_duplicatesubmission', isset($settings->duplicatesubmission) ? $settings->duplicatesubmission : true);
+        $mform->addHelpButton('assignsubmissionauthor_duplicatesubmission', 'duplicatesubmission', 'assignsubmission_author');
+        $mform->disabledIf('assignsubmissionauthor_duplicatesubmission', 'assignsubmission_author_enabled', 'notchecked');
     }
 
     /**
@@ -146,6 +153,9 @@ class assign_submission_author extends assign_submission_plugin
 
         $checkgroupsused = isset($data->assignsubmissionauthor_displaymail);
         $this->set_config('displaymail', $checkgroupsused ? $data->assignsubmissionauthor_displaymail : 0);
+
+        $checkgroupsused = isset($data->assignsubmissionauthor_duplicatesubmission);
+        $this->set_config('duplicatesubmission', $checkgroupsused ? $data->assignsubmissionauthor_duplicatesubmission : 0);
         return true;
     }
 
@@ -330,6 +340,7 @@ class assign_submission_author extends assign_submission_plugin
 
         $submissioncontroller = new submission_controller();
         $authorgroupcontroller = new author_group_controller($this->assignment);
+        $settings = $this->get_config();
 
         // If team submission is activated no submission is possible.
         if ($this->assignment->get_instance()->teamsubmission == 1) {
@@ -396,8 +407,8 @@ class assign_submission_author extends assign_submission_plugin
                             $authorlist = implode(',', $currentcoauthors);
 
                             // Create and update author group with new and current coauthors.
-                            $authorgroupcontroller->create_author_group($newcoauthors, $submission, $authorlist, $data);
-                            $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data);
+                            $authorgroupcontroller->create_author_group($newcoauthors, $submission, $authorlist, $data, $settings);
+                            $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data, $settings);
 
                             // Update own author submission.
                             $submissioncontroller->update_author_submission($authorsubmission, $author, $authorlist);
@@ -434,8 +445,8 @@ class assign_submission_author extends assign_submission_plugin
                         $authorlist = implode(',', $currentcoauthors);
 
                         // Create and update author group with new and current coauthors.
-                        $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data);
-                        $authorgroupcontroller->create_author_group($newcoauthors, $submission, $authorlist, $data);
+                        $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data, $settings);
+                        $authorgroupcontroller->create_author_group($newcoauthors, $submission, $authorlist, $data, $settings);
 
                         // Update own author submission.
                         $submissioncontroller->update_author_submission($authorsubmission, $author, $authorlist);
@@ -475,8 +486,8 @@ class assign_submission_author extends assign_submission_plugin
 
                         // Update or delete remaining author group.
                         if ($authorlist != '') {
-                            $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data);
-                            $authorgroupcontroller->update_author_group($updateauthor, $submission->assignment, $author, $authorlist, $data);
+                            $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data, $settings);
+                            $authorgroupcontroller->update_author_group($updateauthor, $submission->assignment, $author, $authorlist, $data, $settings);
                         } else {
                             $authorgroupcontroller->delete_author_group($updatecoauthors, $submission->assignment);
                             $authorgroupcontroller->delete_author_group($updateauthor, $submission->assignment);
@@ -497,7 +508,7 @@ class assign_submission_author extends assign_submission_plugin
                         $authorlist = implode(',', $selectedcoauthors);
 
                         // Create new author group.
-                        $authorgroupcontroller->create_author_group($selectedcoauthors, $submission, $authorlist, $data);
+                        $authorgroupcontroller->create_author_group($selectedcoauthors, $submission, $authorlist, $data, $settings);
 
                         $currentcoauthors = $selectedcoauthors;
 
@@ -533,8 +544,8 @@ class assign_submission_author extends assign_submission_plugin
 
                         // Update or delete remaining authorgroup.
                         if ($authorlist != '') {
-                            $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data);
-                            $authorgroupcontroller->update_author_group($updateauthor, $submission->assignment, $author, $authorlist, $data);
+                            $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data, $settings);
+                            $authorgroupcontroller->update_author_group($updateauthor, $submission->assignment, $author, $authorlist, $data, $settings);
                         } else {
                             $authorgroupcontroller->delete_author_group($updatecoauthors, $submission->assignment);
                             $authorgroupcontroller->delete_author_group($updateauthor, $submission->assignment);
@@ -547,7 +558,7 @@ class assign_submission_author extends assign_submission_plugin
                         $authorlist = implode(',', $defaultcoauthors);
 
                         // Create new authorgroup by default.
-                        $authorgroupcontroller->create_author_group($defaultcoauthors, $submission, $authorlist, $data);
+                        $authorgroupcontroller->create_author_group($defaultcoauthors, $submission, $authorlist, $data, $settings);
 
                         $currentcoauthors = $defaultcoauthors;
 
@@ -576,8 +587,8 @@ class assign_submission_author extends assign_submission_plugin
                         $authorlist = implode(',', $updatecoauthors);
 
                         // Update current author group.
-                        $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data);
-                        $authorgroupcontroller->update_author_group($updateauthor, $submission->assignment, $author, $authorlist, $data);
+                        $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data, $settings);
+                        $authorgroupcontroller->update_author_group($updateauthor, $submission->assignment, $author, $authorlist, $data, $settings);
 
                         // Delete own author submission.
                         $submissioncontroller->delete_author_submission($userid, $submission->assignment);
@@ -601,7 +612,7 @@ class assign_submission_author extends assign_submission_plugin
                     $authorlist = implode(',', $currentcoauthors);
 
                     // Create new authorgroup.
-                    $authorgroupcontroller->create_author_group($currentcoauthors, $submission, $authorlist, $data);
+                    $authorgroupcontroller->create_author_group($currentcoauthors, $submission, $authorlist, $data, $settings);
                     $submissioncontroller->create_author_submission($submission->assignment, $submission->id, $author, $authorlist);
 
                     // If notifications are on then send notifications to all new and currend coauthors.
@@ -623,7 +634,7 @@ class assign_submission_author extends assign_submission_plugin
                     $authorlist = implode(',', $currentcoauthors);
 
                     // Create new authorgroup.
-                    $authorgroupcontroller->create_author_group($currentcoauthors, $submission, $authorlist, $data);
+                    $authorgroupcontroller->create_author_group($currentcoauthors, $submission, $authorlist, $data, $settings);
                     $submissioncontroller->create_author_submission($submission->assignment, $submission->id, $author, $authorlist);
 
                     // If notifications are on then send notifications to all new and currend coauthors.
