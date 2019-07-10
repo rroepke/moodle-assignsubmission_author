@@ -279,7 +279,7 @@ class assign_submission_author extends assign_submission_plugin
             $mform->setDefault('selcoauthors', 'checked');
         }
 
-        $mform->addElement('header','header',get_string('header', 'assignsubmission_author'));
+        $mform->addElement('header', 'header', get_string('header', 'assignsubmission_author'));
 
         // Select the right string to display the "choose new co authors" option, depending on the settings done by the teacher.
         $settings = $this->get_config();
@@ -288,7 +288,7 @@ class assign_submission_author extends assign_submission_plugin
             if (isset($settings->duplicatesubmission) && $settings->duplicatesubmission && isset($settings->removesubmission) && $settings->removesubmission) {
                 // Submissions are both duplicated and deleted
                 $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_new_coauthors_remove', 'assignsubmission_author'), 1);
-            } elseif (isset($settings->duplicatesubmission) && $settings->duplicatesubmission) {
+            } else if (isset($settings->duplicatesubmission) && $settings->duplicatesubmission) {
                 // Submissions are only duplicated, but never deleted
                 $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_new_coauthors_no_remove', 'assignsubmission_author'), 1);
             } else {
@@ -300,7 +300,7 @@ class assign_submission_author extends assign_submission_plugin
             if (isset($settings->duplicatesubmission) && $settings->duplicatesubmission && isset($settings->removesubmission) && $settings->removesubmission) {
                 // Submissions are both duplicated and deleted
                 $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_coauthors_remove', 'assignsubmission_author'), 1);
-            } elseif (isset($settings->duplicatesubmission) && $settings->duplicatesubmission) {
+            } else if (isset($settings->duplicatesubmission) && $settings->duplicatesubmission) {
                 // Submissions are only duplicated, but never deleted
                 $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_coauthors_no_remove', 'assignsubmission_author'), 1);
             } else {
