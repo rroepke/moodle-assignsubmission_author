@@ -64,7 +64,6 @@ class author_group_controller {
 
         $author = $submission->userid;
         foreach ($coauthors as $key => $coauthor) {
-
             // A "new" submission is created when a student simply views the assign page.
             $coauthorsubmission = $submissioncontroller->get_submission($coauthor, $assignment);
 
@@ -86,8 +85,21 @@ class author_group_controller {
 
             $id = $coauthorsubmission->id;
             $submissioncontroller->create_author_submission($assignment, $id, $author, $authorlist);
-
         }
+
+        // Trigger the event so it is added to the logs.
+        $params = array(
+            'context' => \context_module::instance($this->assignment->get_course_module()->id),
+            'courseid' => $this->assignment->get_course()->id,
+            'objectid' => $submission->id,
+            'other' => array(
+                'coauthors' => $coauthors
+            )
+        );
+        $event = \assignsubmission_author\event\author_group_created::create($params);
+        $event->set_assign($this->assignment);
+        $event->trigger();
+
     }
 
     /**
@@ -105,7 +117,6 @@ class author_group_controller {
         foreach ($coauthors as $coauthor) {
             $coauthorsubmission = $submissioncontroller->get_submission($coauthor, $assignment);
             if ($coauthorsubmission) {
-
                 if (isset($settings->duplicatesubmission) && $settings->duplicatesubmission) {
                     $this->duplicate_submission($coauthorsubmission, $data);
                 }
@@ -118,7 +129,6 @@ class author_group_controller {
                     $authorsubmission->authorlist = $authorlist;
                     $DB->update_record('assignsubmission_author', $authorsubmission, false);
                 }
-
             }
         }
     }

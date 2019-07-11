@@ -268,6 +268,18 @@ class assign_submission_author extends assign_submission_plugin
         $mform->disabledIf('groupcoauthors', 'selcoauthors', 'checked');
         $mform->disabledIf('groupcoauthors', 'nocoauthors', 'checked');
 
+        // Show default co authors if there are any saved.
+        if (isset($showdefault) && $showdefault && isset($default)) {
+            $mform->addElement('checkbox', 'defcoauthors', '',
+                get_string('choose_defaultcoauthors', 'assignsubmission_author'), 1);
+            $mform->addElement('static', 'defaultcoauthors',
+                get_string('defaultcoauthors', 'assignsubmission_author'), $default, 1);
+            $mform->addElement('static', '', '', '');
+            $mform->setDefault('defcoauthors', 'checked');
+        } else if (!$alreadyinauthorgroup) { // Else pre-select "choose co authors for author only.
+            $mform->setDefault('selcoauthors', 'checked');
+        }
+
         // Show existing author group for co authors.
         if ($alreadyinauthorgroup) {
             $mform->setDefault('groupcoauthors', 'checked');
@@ -275,8 +287,6 @@ class assign_submission_author extends assign_submission_plugin
             $mform->addElement('static', 'group2coauthors', get_string('group', 'assignsubmission_author'),
                 $this->get_summary($origauthor, array_diff_key($selectedauthors, $origauthor)), null);
             $mform->addElement('static', '', '', '');
-        } else {
-            $mform->setDefault('selcoauthors', 'checked');
         }
 
         $mform->addElement('header', 'header', get_string('header', 'assignsubmission_author'));
@@ -292,7 +302,7 @@ class assign_submission_author extends assign_submission_plugin
                 // Submissions are only duplicated, but never deleted
                 $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_new_coauthors_no_remove', 'assignsubmission_author'), 1);
             } else {
-                // Submissions are not duplicated so there are is no extra explanation.
+                // Submissions are not duplicated so there is is no extra explanation.
                 $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_new_coauthors', 'assignsubmission_author'), 1);
             }
         } else {
@@ -304,7 +314,7 @@ class assign_submission_author extends assign_submission_plugin
                 // Submissions are only duplicated, but never deleted
                 $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_coauthors_no_remove', 'assignsubmission_author'), 1);
             } else {
-                // Submissions are not duplicated so there are is no extra explanation.
+                // Submissions are not duplicated so there is is no extra explanation.
                 $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_coauthors', 'assignsubmission_author'), 1);
             }
         }
@@ -328,14 +338,8 @@ class assign_submission_author extends assign_submission_plugin
             $mform->addElement('checkbox', 'asdefault', ' ', get_string('asdefault', 'assignsubmission_author'));
             $mform->disabledIf('asdefault', 'selcoauthors', 'notchecked');
 
-            // Set preselected coauthors.
-            if ($alreadyinauthorgroup) {
-                $i = 0;
-                foreach ($selectedauthors as $key => $value) {
-                    $mform->setDefault('coauthors[' . $i . ']', 0);
-                    $i++;
-                }
-            } else {
+            // Set preselected coauthors for author.
+            if (!$alreadyinauthorgroup) {
                 $i = 0;
                 foreach ($selectedauthors as $key => $value) {
                     $mform->setDefault('coauthors[' . $i . ']', $key);
@@ -347,15 +351,6 @@ class assign_submission_author extends assign_submission_plugin
         }
 
         $mform->addElement('static', '', '', '');
-
-        // If we can use the default, then display option for setting default authors.
-        if (isset($showdefault) && $showdefault && isset($default)) {
-            $mform->addElement('checkbox', 'defcoauthors', '',
-                get_string('choose_defaultcoauthors', 'assignsubmission_author'), 1);
-            $mform->addElement('static', 'defaultcoauthors',
-                get_string('defaultcoauthors', 'assignsubmission_author'), $default, 1);
-            $mform->addElement('static', '', '', '');
-        }
 
         // Display option for no coauthors.
         $mform->addElement('checkbox', 'nocoauthors', '', get_string('choose_nocoauthors', 'assignsubmission_author'), 1);
@@ -374,6 +369,9 @@ class assign_submission_author extends assign_submission_plugin
      */
     public function save(stdClass $submission, stdClass $data) {
         global $USER, $COURSE;
+
+        echo '<pre>'; print_r("-------------------------data-------------------------------------------------------------------------------------"); echo '</pre>';
+        echo '<pre>'; print_r($data); echo '</pre>';
 
         $submissioncontroller = new submission_controller();
         $authorgroupcontroller = new author_group_controller($this->assignment);
@@ -429,18 +427,23 @@ class assign_submission_author extends assign_submission_plugin
                                 $this->remove($submission);
                             }
                             $authorgroupcontroller->delete_author_group($deletecoauthors, $submission->assignment);
+                            // TODO: Event "author group deleted"
+                            // TODO: Send notifications to deleted users.
 
                             $submissioncontroller->delete_author_submission($userid, $submission->assignment);
 
                         } else { // There are new coauthors selected. Update author group.
 
+                            // TODO: Event update author group from $currentcoauthors to $selectedcoauthors
+                            // TODO: Trigger event authro group created if $currentcoauthors empty
+
                             // Distinguish between new coauthors, deleted coauthors, current coauthors.
-                            $deletecoauthors = array_diff($currentcoauthors, $selectedcoauthors);
+                            $deletecoauthors = array_diff($currentcoauthors, $selectedcoauthors); // TODO: Send notifications to deleted users.
                             $newcoauthors = array_diff($selectedcoauthors, $currentcoauthors);
                             $updatecoauthors = array_diff($selectedcoauthors, $newcoauthors);
                             $currentcoauthors = $selectedcoauthors;
 
-                            // Delete author group with deleted coauthors and remove thei submission if set.
+                            // Delete author group with deleted coauthors and remove their submission if set in settings.
                             if (isset($settings->removesubmission) && $settings->removesubmission) {
                                 $this->remove($submission);
                             }
@@ -461,7 +464,7 @@ class assign_submission_author extends assign_submission_plugin
                                 $authorgroupcontroller->set_author_default($authorlist, $userid, $courseid);
                             }
 
-                            // If notifications are on then send notifications to all new and currend coauthors.
+                            // If notifications are on then send notifications to all coauthors.
                             if ($notification) {
                                 $this->send_notifications($author, $currentcoauthors);
                             }
@@ -469,16 +472,18 @@ class assign_submission_author extends assign_submission_plugin
 
                         return true;
                     } else if (isset($data->defcoauthors) && $data->defcoauthors == 1) {
-                        // Option "Save as new default co-authors" - author perspective.
+                        // Option "Use default co authors" - author perspective.
 
                         // Get default coauthors.
                         $defaultcoauthors = $authorgroupcontroller->get_default_coauthors($userid, $courseid);
 
+                        // TODO: Trigger event "author group updated" from $currentcoauthors to $defaultcoauthors
+                        // TODO: Trigger event "authro group created" if $currentcoauthors empty
+
                         // Distinguish between new coauthors, deleted coauthors, current coauthors.
-                        $deletecoauthors = array_diff($currentcoauthors, $defaultcoauthors);
+                        $deletecoauthors = array_diff($currentcoauthors, $defaultcoauthors); // TODO: Send notification to deleted users.
                         $newcoauthors = array_diff($defaultcoauthors, $currentcoauthors);
                         $updatecoauthors = array_diff($defaultcoauthors, $newcoauthors);
-
                         $currentcoauthors = $defaultcoauthors;
 
                         // Delete author group with deleted coauthors.
@@ -497,7 +502,7 @@ class assign_submission_author extends assign_submission_plugin
                         // Update own author submission.
                         $submissioncontroller->update_author_submission($authorsubmission, $author, $authorlist);
 
-                        // If notifications are on then send notifications to all new and currend coauthors.
+                        // If notifications are on then send notifications to all coauthors.
                         if ($notification) {
                             $this->send_notifications($author, $currentcoauthors);
                         }
@@ -506,13 +511,13 @@ class assign_submission_author extends assign_submission_plugin
                     } else if (isset($data->nocoauthors) && $data->nocoauthors == 1) {
                         // Option "No co authors" - author perspective.
 
-                        $deletecoauthors = $currentcoauthors;
-
                         // Delete authorgroup.
                         if (isset($settings->removesubmission) && $settings->removesubmission) {
                             $this->remove($submission);
                         }
                         $authorgroupcontroller->delete_author_group($deletecoauthors, $submission->assignment);
+                        // TODO: Add event author group deleted with old authors $deletecoauthors
+                        // TODO: Send notification to deleted users
 
                         $submissioncontroller->delete_author_submission($userid, $submission->assignment);
                         return true;
@@ -531,6 +536,7 @@ class assign_submission_author extends assign_submission_plugin
                             $authorgroupcontroller->update_author_group($updatecoauthors, $submission->assignment, $author, $authorlist, $data, $settings);
                             $authorgroupcontroller->update_author_group($updateauthor, $submission->assignment, $author, $authorlist, $data, $settings);
                         } else {
+                            // Delete author group if there is no one remaining, e.g. when there were only 2 members.
                             if (isset($settings->removesubmission) && $settings->removesubmission) {
                                 $this->remove($submission);
                             }
@@ -539,6 +545,10 @@ class assign_submission_author extends assign_submission_plugin
                         }
 
                         $selectedcoauthors = utilities::get_selected_coauthors($data);
+
+                        // TODO: Author group updated from $currentcoauthors to $updatecoauthors
+                        // TODO: Event author group created with $selectedcoauthors
+
                         // Delete author group and submission.
                         if (count($selectedcoauthors) == 0) {
                             $deletecoauthors = $currentcoauthors;
@@ -573,7 +583,9 @@ class assign_submission_author extends assign_submission_plugin
                         return true;
 
                     } else if (isset($data->defcoauthors) && $data->defcoauthors == 1) {
-                        // Option "Save as new default co-authors in this course" - coauthor perspective.
+                        // Option "Use default co authors" - author perspective.
+                        // TODO: author or co author perspective?
+                        // TODO: Is this even used somewhere?
                         $updatecoauthors = array_diff($currentcoauthors, array($userid));
                         $updateauthor = array($authorsubmission->author);
 
@@ -603,7 +615,7 @@ class assign_submission_author extends assign_submission_plugin
                         // Update own authorsubmission.
                         $submissioncontroller->update_author_submission($authorsubmission, $author, $authorlist);
 
-                        // If notifications are on then send notifications to all new and current coauthors.
+                        // If notifications are on then send notifications to all coauthors.
                         $currentcoauthors = $defaultcoauthors;
                         if ($notification) {
                             $this->send_notifications($author, $currentcoauthors);
@@ -611,9 +623,12 @@ class assign_submission_author extends assign_submission_plugin
                         return true;
                     } else if (isset($data->nocoauthors) && $data->nocoauthors == 1) {
                         // Option "No co-authors" - coauthor perspective.
+                        // This only removes the co author from the submission, the author group remains intact.
 
                         $updatecoauthors = array_diff($currentcoauthors, array($userid));
                         $updateauthor = array($authorsubmission->author);
+
+                        // TODO: Event update author group from $currentcoauthors to $updatecoauthors.
 
                         $author = $authorsubmission->author;
                         $authorlist = implode(',', $updatecoauthors);
@@ -635,6 +650,7 @@ class assign_submission_author extends assign_submission_plugin
 
                     // Get new coauthors.
                     $currentcoauthors = utilities::get_selected_coauthors($data);
+                    // TODO: Event author group created.
 
                     if (count($currentcoauthors) == 0) {
                         return true;
@@ -647,7 +663,7 @@ class assign_submission_author extends assign_submission_plugin
                     $authorgroupcontroller->create_author_group($currentcoauthors, $submission, $authorlist, $data, $settings);
                     $submissioncontroller->create_author_submission($submission->assignment, $submission->id, $author, $authorlist);
 
-                    // If notifications are on then send notifications to all new and currend coauthors.
+                    // If notifications are on then send notifications to all coauthors.
                     if ($notification) {
                         $this->send_notifications($author, $currentcoauthors);
                     }
@@ -659,7 +675,8 @@ class assign_submission_author extends assign_submission_plugin
                     return true;
 
                 } else if (isset($data->defcoauthors) && $data->defcoauthors == 1) {
-                    // Option "Save as new default co-authors in this course " - new authorgroup like the default group.
+                    // Option "Use default co-authors in this course".
+                    // When there is no submission yet, i.e. there is no authorgroup.
                     $currentcoauthors = $authorgroupcontroller->get_default_coauthors($userid, $courseid);
 
                     $author = $userid;
@@ -668,8 +685,9 @@ class assign_submission_author extends assign_submission_plugin
                     // Create new authorgroup.
                     $authorgroupcontroller->create_author_group($currentcoauthors, $submission, $authorlist, $data, $settings);
                     $submissioncontroller->create_author_submission($submission->assignment, $submission->id, $author, $authorlist);
+                    // TODO: Event author group created.
 
-                    // If notifications are on then send notifications to all new and currend coauthors.
+                    // If notifications are on then send notifications to all coauthors.
                     if ($notification) {
                         $this->send_notifications($author, $currentcoauthors);
                     }
