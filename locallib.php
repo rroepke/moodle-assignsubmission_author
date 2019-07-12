@@ -279,32 +279,21 @@ class assign_submission_author extends assign_submission_plugin
 
         // Select the right string to display the "choose new co authors" option, depending on the settings done by the teacher.
         $settings = $this->get_config();
-        // TODO: Umschreiben, sodass mform nur einmal am Schluss hinzugefügt wird und der String nur in den ifs zusammen gebaut wird. Lang Strings entsprechend umbauen.
-        if ($alreadyinauthorgroup) {
-            // Option "Choose new co authors" - co author perspective
+        $concequencesstring = '';
+        if ($alreadyinauthorgroup) { // Co author perspective.
+            $chooseauthorsstring = get_string('choose_new_coauthors', 'assignsubmission_author');
+            if (isset($settings->duplicatesubmission) && $settings->duplicatesubmission) {
+                $concequencesstring = get_string('choose_new_coauthors_no_remove', 'assignsubmission_author'); // Submissions are duplicated and deleted.
+            } // No different string when submissions are deleted because this only affects authors.
+        } else { // Author perspective.
+            $chooseauthorsstring = get_string('choose_coauthors', 'assignsubmission_author');
             if (isset($settings->duplicatesubmission) && $settings->duplicatesubmission && isset($settings->removesubmission) && $settings->removesubmission) {
-                // Submissions are both duplicated and deleted
-                $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_new_coauthors_remove', 'assignsubmission_author'), 1);
+                $concequencesstring = get_string('choose_coauthors_remove', 'assignsubmission_author'); // Submissions are duplicated and deleted.
             } else if (isset($settings->duplicatesubmission) && $settings->duplicatesubmission) {
-                // Submissions are only duplicated, but never deleted
-                $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_new_coauthors_no_remove', 'assignsubmission_author'), 1);
-            } else {
-                // Submissions are not duplicated so there is is no extra explanation.
-                $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_new_coauthors', 'assignsubmission_author'), 1);
-            }
-        } else {
-            // Option "Choose co authors" - author perspective
-            if (isset($settings->duplicatesubmission) && $settings->duplicatesubmission && isset($settings->removesubmission) && $settings->removesubmission) {
-                // Submissions are both duplicated and deleted
-                $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_coauthors_remove', 'assignsubmission_author'), 1);
-            } else if (isset($settings->duplicatesubmission) && $settings->duplicatesubmission) {
-                // Submissions are only duplicated, but never deleted
-                $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_coauthors_no_remove', 'assignsubmission_author'), 1);
-            } else {
-                // Submissions are not duplicated so there is is no extra explanation.
-                $mform->addElement('checkbox', 'selcoauthors', '', get_string('choose_coauthors', 'assignsubmission_author'), 1);
+                $concequencesstring = get_string('choose_coauthors_no_remove', 'assignsubmission_author'); // Submissions are only duplicated.
             }
         }
+        $mform->addElement('checkbox', 'selcoauthors', '', $chooseauthorsstring.$concequencesstring, 1);
 
         if (count($possiblecoauthors) != 0) {
             // Define content of choice boxes.
@@ -319,7 +308,7 @@ class assign_submission_author extends assign_submission_plugin
             }
 
             // Add elements.
-            $mform->addElement('group', 'coauthorselection',get_string('coauthors', 'assignsubmission_author'), $objs, ' ', false);
+            $mform->addElement('group', 'coauthorselection', get_string('coauthors', 'assignsubmission_author'), $objs, ' ', false);
             $mform->disabledIf('coauthorselection', 'selcoauthors', 'notchecked');
             $mform->addElement('checkbox', 'asdefault', ' ', get_string('asdefault', 'assignsubmission_author'));
             $mform->disabledIf('asdefault', 'selcoauthors', 'notchecked');
@@ -348,7 +337,7 @@ class assign_submission_author extends assign_submission_plugin
         }
 
         // Display option for no coauthors.
-        $mform->addElement('checkbox', 'nocoauthors', '', get_string('choose_nocoauthors', 'assignsubmission_author'), 1);
+        $mform->addElement('checkbox', 'nocoauthors', '', get_string('choose_nocoauthors', 'assignsubmission_author').$concequencesstring, 1);
 
         return true;
     }
@@ -395,7 +384,7 @@ class assign_submission_author extends assign_submission_plugin
                     // Option "Choose group" (which the original author created) - coauthor perspective.
                     $allauthorids = explode(',', $authorsubmission->author . ',' . $authorsubmission->authorlist);
 
-                    // Clone this submission for every other author
+                    // Clone this submission for every other author.
                     foreach ($allauthorids as $authorid) {
                         if ($authorid != $userid) {
                             $submissiontooverwrite = $submissioncontroller->get_submission($authorid, $assignment);
@@ -507,7 +496,7 @@ class assign_submission_author extends assign_submission_plugin
                         }
                         $authorgroupcontroller->delete_author_group($currentcoauthors, $submission->assignment);
                         $this->trigger_delete_event($userid, $currentcoauthors, $submission);
-                        // TODO: Send notification to deleted users
+                        // TODO: Send notification to deleted users.
 
                         $submissioncontroller->delete_author_submission($userid, $submission->assignment);
                         return true;

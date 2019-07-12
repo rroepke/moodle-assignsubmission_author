@@ -27,13 +27,12 @@ $string['author'] = 'Author groups';
 $string['choose'] = 'Choose co-author';
 $string['choose_group'] = 'Choose existing author group';
 $string['choose_coauthors'] = 'Choose co-authors';
-$string['choose_coauthors_remove'] = 'Choose co-authors (When changing the co authors after a submission has been made, the submission will be deleted for the old co authors)';
-$string['choose_coauthors_no_remove'] = 'Choose co-authors (When changing the co authors after a submission has been made, the old submission will remain with the old co authors)';
+$string['choose_coauthors_remove'] = '. When changing the co authors after a submission has been made, the submission will be deleted for the old co authors.';
+$string['choose_coauthors_no_remove'] = '. When changing the co authors after a submission has been made, the old submission will remain with the old co authors.';
 $string['choose_new_coauthors'] = 'Choose new co-authors';
-$string['choose_new_coauthors_remove'] = 'Choose new co-authors (If something has already been submitted, the submission will be deleted for the old authors listed above)';
-$string['choose_new_coauthors_no_remove'] = 'Choose new co-authors (If something has already been submitted, the old submission will remain with the old authors listed above)';
+$string['choose_new_coauthors_no_remove'] = '. If something has already been submitted, the old submission will remain with the old authors.';
 $string['choose_defaultcoauthors'] = 'Choose your default co-authors';
-$string['choose_nocoauthors'] = 'No co-authors (this has the same implications as removing both co authors above)';
+$string['choose_nocoauthors'] = 'No co-authors';
 
 $string['summary_author'] = 'Author';
 $string['summary_coauthors'] = 'Co-authors';
@@ -62,14 +61,15 @@ $string['groupsused_help'] = 'If groups and this option are enabled, only member
 $string['displaymail'] = 'Display Mails of users alongside their names';
 $string['displaymail_help'] = "This helps users identify their desired co authors when there are multiples of same names. <br><br>Please be aware of users' privacy.";
 $string['duplicatesubmission'] = 'Duplicate submission for all group members';
-$string['duplicatesubmission_help'] = 'When enabled, the submission from the original author will be duplicated for every co author and vise versa.'
+$string['duplicatesubmission_help'] = 'When enabled, the submission from the original author will be duplicated for every co author and vise versa.<br>'
 .'This way all authors of a co author group can see and edit the submission. <br><br>'
 .'Be aware that this setting means a user can multiply his/her submission for every user in the course if he/she juggles through all available co authors.'
-.'It also breaks plagiarism plugins because the users have exactly the same submission.';
-$string['removesubmission'] = 'Remove submission when authors are removed or changed';
-$string['removesubmission_help'] = 'When the group members of an author group are changed after a submission, the submission is also removed for the removed authors.'
-.'The removed authors then have no submission anymore. <br><br>'
-.'This could result in users "taking away" other users submissions without them knowing.';
+.'It also show false positives with plagiarism plugins because the users have exactly the same submission.';
+$string['removesubmission'] = 'Remove submission when co-authors are removed';
+$string['removesubmission_help'] = 'When the group members of an author group are changed after a submission by the author, the submission is also removed for the removed authors.'
+.'The removed authors then have no submission anymore. This can be useful if the author chose wrong co authors. <br><br>'
+.'But this could result in authors "taking away" other users submissions without them knowing.<br><br>'
+.'If co authors change their group, the submission will still remain with the original author and the rest of the co authors.';
 
 $string['asdefault'] = 'Save as new default co-authors in this course';
 $string['default'] = 'Enabled by default';
