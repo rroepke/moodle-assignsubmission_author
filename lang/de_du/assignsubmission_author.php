@@ -45,8 +45,10 @@ $string['defaultcoauthors'] = 'Standard-Co-Autoren';
 $string['oneauthoronly'] = 'Die maximale Anzahl an Co-Autoren wurde auf 1 gesetzt.';
 $string['noteamsubmission'] = 'Der Abgabetyp "Autorengruppen" kann nicht gemeinsam mit der Einstellung für Gruppeneinreichungen genutzt werden. Bitte kontaktiere bei weiteren Fragen den Veranstalter des Kurses.';
 
-$string['subject'] = 'Abgabe als Autorengruppe im Kurs <a href="{$a->courseurl}">{$a->coursename}</a>';
-$string['message'] = '{$a->username} hat dich in Aufgabe <a href="{$a->assignmenturl}">{$a->assignmentname}</a> als Co-Autor eingetragen.';
+$string['subject'] = 'Abgabe in einer Autorengruppe im Kurs "{$a->coursename}"';
+$string['subject_deleted'] = 'Du wurdest aus einer Autorengruppe im Kurs "{$a->coursename}" entfernt';
+$string['message'] = 'Kurs <a href="{$a->courseurl}">{$a->coursename}</a>: <a href="{$a->userurl}">{$a->username}</a> hat eine Einreichung für die Abgabe <a href="{$a->assignmenturl}">{$a->assignmentname}</a> eingereicht und dich als Co-Autor hinzugefügt.';
+$string['message_deleted'] = 'Kurs <a href="{$a->courseurl}">{$a->coursename}</a>: <a href="{$a->userurl}">{$a->username}</a> hat dich als co-autor in der Abgabe <a href="{$a->assignmenturl}">{$a->assignmentname}</a> entfernt.';
 
 // Mod settings for each instance.
 $string['setting_explanation'] = 'Diese Einstellungen sind deaktiviert, wenn die "'.$string['author'].'" Checkbox in dem Abschnitt "{$a->submisiontypesstring}" oben nicht gesetzt ist.';
@@ -55,7 +57,7 @@ $string['maxauthors_help'] = 'Die maximale Anzahl an Autoren pro Gruppe beinhalt
 $string['ingroupsonly'] = 'Nur in der selben Gruppe';
 $string['ingroupsonly_help'] = 'Wenn diese Option ausgewählt ist, können Teilnehmer/innen nur aus der eigenen Gruppe Co-Autoren auswählen, wenn nicht, dann aus dem ganzen Kurs.';
 $string['notification'] = 'Benachrichtung aller Co-Autoren';
-$string['notification_help'] = 'Wenn diese Option ausgewählt ist, werden alle Co-Autoren bei Abgabe benachrichtigt';
+$string['notification_help'] = 'Alle Co-Autoren werden bei einer Abgabe benachrichtigt und, wenn sie von einer Ko-Autoren Gruppe entfernt werden.';
 $string['groupsused'] = 'Gruppenmodus aktiv?';
 $string['groupsused_help'] = 'Ist der Gruppenmodus aktiviert und diese Option wird ausgewählt, dann wird zur Nutzung von Autorengruppen vorausgesetzt, dass der Teilnehmer in eine Gruppe eingetragen ist. Ist er es nicht, kann er keine Autorengruppe auswählen.';
 $string['displaymail'] = 'Mail-Adresse von Nutzern neben ihren Namen anzeigen';

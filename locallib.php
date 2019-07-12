@@ -409,7 +409,9 @@ class assign_submission_author extends assign_submission_plugin
                             }
                             $authorgroupcontroller->delete_author_group($deletecoauthors, $submission->assignment);
                             $this->trigger_delete_event($userid, $deletecoauthors, $submission);
-                            // TODO: Send notifications to deleted users.
+                            if ($notification) {
+                                $this->send_notifications($userid, array(), $deletecoauthors);
+                            }
 
                             $submissioncontroller->delete_author_submission($userid, $submission->assignment);
 
@@ -418,7 +420,7 @@ class assign_submission_author extends assign_submission_plugin
                             $this->trigger_update_event($userid, $currentcoauthors, $selectedcoauthors, $submission);
 
                             // Distinguish between new coauthors, deleted coauthors, current coauthors.
-                            $deletecoauthors = array_diff($currentcoauthors, $selectedcoauthors); // TODO: Send notifications to deleted users.
+                            $deletecoauthors = array_diff($currentcoauthors, $selectedcoauthors);
                             $newcoauthors = array_diff($selectedcoauthors, $currentcoauthors);
                             $updatecoauthors = array_diff($selectedcoauthors, $newcoauthors);
                             $currentcoauthors = $selectedcoauthors;
@@ -446,7 +448,7 @@ class assign_submission_author extends assign_submission_plugin
 
                             // If notifications are on then send notifications to all coauthors.
                             if ($notification) {
-                                $this->send_notifications($author, $currentcoauthors);
+                                $this->send_notifications($author, $currentcoauthors, $deletecoauthors);
                             }
                         }
 
@@ -460,7 +462,7 @@ class assign_submission_author extends assign_submission_plugin
                         $this->trigger_update_event($userid, $currentcoauthors, $defaultcoauthors, $submission);
 
                         // Distinguish between new coauthors, deleted coauthors, current coauthors.
-                        $deletecoauthors = array_diff($currentcoauthors, $defaultcoauthors); // TODO: Send notification to deleted users.
+                        $deletecoauthors = array_diff($currentcoauthors, $defaultcoauthors);
                         $newcoauthors = array_diff($defaultcoauthors, $currentcoauthors);
                         $updatecoauthors = array_diff($defaultcoauthors, $newcoauthors);
                         $currentcoauthors = $defaultcoauthors;
@@ -483,7 +485,7 @@ class assign_submission_author extends assign_submission_plugin
 
                         // If notifications are on then send notifications to all coauthors.
                         if ($notification) {
-                            $this->send_notifications($author, $currentcoauthors);
+                            $this->send_notifications($author, $currentcoauthors, $deletecoauthors);
                         }
 
                         return true;
@@ -496,7 +498,9 @@ class assign_submission_author extends assign_submission_plugin
                         }
                         $authorgroupcontroller->delete_author_group($currentcoauthors, $submission->assignment);
                         $this->trigger_delete_event($userid, $currentcoauthors, $submission);
-                        // TODO: Send notification to deleted users.
+                        if ($notification) {
+                            $this->send_notifications($userid, array(), $currentcoauthors);
+                        }
 
                         $submissioncontroller->delete_author_submission($userid, $submission->assignment);
                         return true;
@@ -549,10 +553,9 @@ class assign_submission_author extends assign_submission_plugin
                         // Update own author submission.
                         $submissioncontroller->update_author_submission($authorsubmission, $author, $authorlist);
 
-                        // If notifications are on then send notifications to all new and current coauthors.
-                        $currentcoauthors = $selectedcoauthors;
+                        // If notifications are on then send notifications to all new, current and deleted coauthors.
                         if ($notification) {
-                            $this->send_notifications($author, $currentcoauthors);
+                            $this->send_notifications($author, $selectedcoauthors);
                         }
 
                         // If default option is set then save this group as default group.
@@ -795,26 +798,54 @@ class assign_submission_author extends assign_submission_plugin
 
     /**
      * Send notifications to all coauthors when they are added to a co author group.
+     * And send notifications to deleted co authors.
      *
      * @param int $author
      * @param int[] $coauthors
+     * @param int[] $removedauthors array of removed authors if appicable
      * @throws coding_exception
      * @throws dml_exception
      */
-    private function send_notifications($author, $coauthors) {
+    private function send_notifications($author, $coauthors, $removedauthors = array()) {
         global $CFG, $USER;
         $course = $this->assignment->get_course();
         $a = new stdClass();
         $a->courseurl = $CFG->wwwroot . '/course/view.php?id=' . $course->id;
         $a->coursename = $course->fullname;
         $a->username = fullname(core_user::get_user($author));
+        $a->userurl = $CFG->wwwroot . '/user/profile.php?id=' . $author;
         $a->assignmentname = format_string($this->assignment->get_instance()->name, true,
                 array('context' => $this->assignment->get_context()));
         $a->assignmenturl = $CFG->wwwroot . '/mod/assign/view.php?id=' . $this->assignment->get_course_module()->id;
         $subject = get_string('subject', 'assignsubmission_author', $a);
-        $message = $subject . ': ' . get_string('message', 'assignsubmission_author', $a);
+        $message = get_string('message', 'assignsubmission_author', $a);
+
+        // Every new co author.
         foreach ($coauthors as $coauthor) {
             $userto = core_user::get_user($coauthor);
+            $eventdata = new \core\message\message;
+            $eventdata->modulename = 'assign';
+            $eventdata->userfrom = $USER;
+            $eventdata->userto = $userto;
+            $eventdata->subject = $subject;
+            $eventdata->fullmessage = $message;
+            $eventdata->fullmessageformat = FORMAT_PLAIN;
+            $eventdata->fullmessagehtml = $message;
+            $eventdata->smallmessage = $subject;
+            $eventdata->name = 'assign_notification';
+            $eventdata->component = 'mod_assign';
+            $eventdata->notification = 1;
+            $eventdata->contexturl = $CFG->wwwroot . '/mod/assign/view.php?id=' . $this->assignment->get_course_module()->id;
+            $eventdata->contexturlname = format_string($this->assignment->get_instance()->name, true, array(
+                    'context' => $this->assignment->get_context()
+            ));
+            message_send($eventdata);
+        }
+
+        // Every deleted co author.
+        $message = get_string('message_deleted', 'assignsubmission_author', $a);
+        foreach ($removedauthors as $removedauthor) {
+            $userto = core_user::get_user($removedauthor);
             $eventdata = new \core\message\message;
             $eventdata->modulename = 'assign';
             $eventdata->userfrom = $USER;

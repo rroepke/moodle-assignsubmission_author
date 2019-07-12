@@ -45,8 +45,10 @@ $string['defaultcoauthors'] = 'Defaul co-authors';
 $string['oneauthoronly'] = 'The maximum number of coauthors has been set to 1.';
 $string['noteamsubmission'] = 'The submission type "Author groups" cannot be used with the group submission settings. Please contact the course manager if you have any questions.';
 
-$string['subject'] = 'Author group submission in course <a href="{$a->courseurl}">{$a->coursename}</a>';
-$string['message'] = '{$a->username} has done a submission for the assignment <a href="{$a->assignmenturl}">{$a->assignmentname}</a> and added you as a co-author.';
+$string['subject'] = 'Author group submission in course "{$a->coursename}"';
+$string['subject_deleted'] = 'You have been removed from an author group in course "{$a->coursename}"';
+$string['message'] = 'Course <a href="{$a->courseurl}">{$a->coursename}</a>: <a href="{$a->userurl}">{$a->username}</a> has done a submission for the assignment <a href="{$a->assignmenturl}">{$a->assignmentname}</a> and added you as a co-author.';
+$string['message_deleted'] = 'Course <a href="{$a->courseurl}">{$a->coursename}</a>: The user <a href="{$a->userurl}">{$a->username}</a> deleted you as a co author from the assignment <a href="{$a->assignmenturl}">{$a->assignmentname}</a>.';
 
 // Mod settings for each instance.
 $string['setting_explanation'] = 'These settings are disabled as long as the "'.$string['author'].'" checkbox is not set in the "{$a->submisiontypesstring}" section above.';
@@ -55,7 +57,7 @@ $string['maxauthors_help'] = 'The maximum number of author includes the user him
 $string['ingroupsonly'] = 'Only in the same group';
 $string['ingroupsonly_help'] = 'If enabled, then the user can only choose co-authors out of his own group, else out of the whole course';
 $string['notification'] = 'Inform all co-authors';
-$string['notification_help'] = 'If enabled, then all co-authors will get a message after a submission';
+$string['notification_help'] = 'If enabled, all co-authors will get a message when a submission was made and when they are removed from an author group';
 $string['groupsused'] = 'Groups enabled?';
 $string['groupsused_help'] = 'If groups and this option are enabled, only members of groups are able to choose co-authors. Others won\'t be able to choose co-authors.';
 $string['displaymail'] = 'Display Mails of users alongside their names';
