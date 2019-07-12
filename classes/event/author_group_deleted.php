@@ -33,8 +33,8 @@ defined('MOODLE_INTERNAL') || die();
  *      Extra information about the event.
  *
  *      - int authorid: id of the group creator.
+ *      - array author: id of the author TODO: Array? Int?
  *      - array oldcoauthors: Array with the ids of the old co authors.
- *      - array newcoauthors: Array with the ids of the new co authors.
  * }
  *
  * @package    assignsubmission_file
@@ -42,7 +42,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2019 Benedikt Schneider (@Nullmann)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class author_group_updated extends \mod_assign\event\base {
+class author_group_deleted extends \mod_assign\event\base {
 
     protected function init() {
         $this->data['crud'] = 'c';
@@ -56,7 +56,7 @@ class author_group_updated extends \mod_assign\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventauthorgroupupdated', 'assignsubmission_author');
+        return get_string('eventauthorgroupdeleted', 'assignsubmission_author');
     }
 
     /**
@@ -65,12 +65,9 @@ class author_group_updated extends \mod_assign\event\base {
      * @return string
      */
     public function get_description() {
-
         $authorid = $this->other['authorid'];
-        $oldcoauthorsstring = implode(', ', $this->other['oldcoauthors']);
-        $newcoauthorsstring = implode(', ', $this->other['newcoauthors']);
-        return "The user with id '$this->userid' has changed the co authors group with author id '$authorid' and group member ids "
-               ."'$oldcoauthorsstring' to group member with ids '$newcoauthorsstring' in the assignment with "
-               ."course module id '$this->contextinstanceid'.";
+        $coauthorsstring = implode(', ', $this->other['oldcoauthors']);
+        return "The user with id '$this->userid' has deleted the co authors group with author id '$authorid' and group member ids " .
+        "'$coauthorsstring' in the assignment with course module id '$this->contextinstanceid'.";
     }
 }

@@ -31,9 +31,8 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @property-read array $other {
  *      Extra information about the event.
- *
- *      - int filesubmissioncount: The number of files uploaded.
- *      TODO: New and old coauthors
+
+ *      - array coauthors: Array with the ids of the co authors.
  * }
  *
  * @package    assignsubmission_file
@@ -65,14 +64,8 @@ class author_group_created extends \mod_assign\event\base {
      */
     public function get_description() {
         $coauthorsstring = implode(', ', $this->other['coauthors']);
-        $descriptionstring = "The user with id '$this->userid' has created a co authors group with group members " .
-        "'$coauthorsstring' in the assignment with course module id '$this->contextinstanceid'";
-        if (!empty($this->other['groupid'])) {
-            $descriptionstring .= " for the group with id '{$this->other['groupid']}'.";
-        } else {
-            $descriptionstring .= ".";
-        }
 
-        return $descriptionstring;
+        return "The user with id '$this->userid' has created a new co authors group with group member ids " .
+        "'$coauthorsstring' in the assignment with course module id '$this->contextinstanceid'.";
     }
 }

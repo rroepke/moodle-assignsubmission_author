@@ -99,3 +99,8 @@ $string['privacy:assignignsubmission_author_def:id'] = 'ID dieses Tabelleneintra
 $string['privacy:assignsubmission_author_def:course'] = 'Die Kurs ID, in dem diese Standardwerte angewendet werden sollen.';
 $string['privacy:assignignsubmission_author_def:userid'] = 'ID des Studierenden, der die ursprüngliche Aufgabe eingereicht hat';
 $string['privacy:assignignsubmission_author_def:coauthors'] = 'Kommagetrennte Liste der Studierenden-IDs, die der Schüler als seine Standard-Koautoren deklariert hat.';
+
+// Event 2.
+$string['eventauthorgroupcreated'] = 'Autorengruppe erstellt';
+$string['eventauthorgroupupdated'] = 'Autorengruppe geändert';
+$string['eventauthorgroupdeleted'] = 'Autorengruppe gelöscht';

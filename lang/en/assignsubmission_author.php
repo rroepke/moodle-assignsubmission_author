@@ -101,3 +101,8 @@ $string['privacy:assignsubmission_author_def:id'] = 'Identifier of this table en
 $string['privacy:assignsubmission_author_def:course'] = 'The course ID in which these defaults should be applied.';
 $string['privacy:assignsubmission_author_def:userid'] = 'ID of student who submitted the original assignment.';
 $string['privacy:assignsubmission_author_def:coauthors'] = 'Comma-separated list of studend IDs the student declared as his/her default co-authors.';
+
+// Event 2.
+$string['eventauthorgroupcreated'] = 'Author group created';
+$string['eventauthorgroupupdated'] = 'Author group updated';
+$string['eventauthorgroupdeleted'] = 'Author group deleted';

@@ -86,20 +86,6 @@ class author_group_controller {
             $id = $coauthorsubmission->id;
             $submissioncontroller->create_author_submission($assignment, $id, $author, $authorlist);
         }
-
-        // Trigger the event so it is added to the logs.
-        $params = array(
-            'context' => \context_module::instance($this->assignment->get_course_module()->id),
-            'courseid' => $this->assignment->get_course()->id,
-            'objectid' => $submission->id,
-            'other' => array(
-                'coauthors' => $coauthors
-            )
-        );
-        $event = \assignsubmission_author\event\author_group_created::create($params);
-        $event->set_assign($this->assignment);
-        $event->trigger();
-
     }
 
     /**
@@ -280,7 +266,7 @@ class author_group_controller {
     }
 
     /**
-     * Get the author default record of a user in course
+     * Get the default co authors record of a user in course
      *
      * @param int $user
      * @param int $course
