@@ -55,22 +55,22 @@ $string['setting_explanation'] = 'These settings are disabled as long as the "'.
 $string['maxauthors'] = 'Maximum number of authors';
 $string['maxauthors_help'] = 'The maximum number of author includes the user himself, e.g. "1" means no other co-authors are allowed, while "2" means one co-author beside the user himself';
 $string['ingroupsonly'] = 'Only in the same group';
-$string['ingroupsonly_help'] = 'If enabled, then the user can only choose co-authors out of his own group, else out of the whole course';
-$string['notification'] = 'Inform all co-authors';
+$string['ingroupsonly_help'] = 'Users can only choose co-authors from members of their own group.';
+$string['notification'] = 'Send notifications to co-authors';
 $string['notification_help'] = 'If enabled, all co-authors will get a message when a submission was made and when they are removed from an author group';
-$string['groupsused'] = 'Groups enabled?';
-$string['groupsused_help'] = 'If groups and this option are enabled, only members of groups are able to choose co-authors. Others won\'t be able to choose co-authors.';
-$string['displaymail'] = 'Display Mails of users alongside their names';
+$string['groupsused'] = 'Users need to be in a group';
+$string['groupsused_help'] = 'If groups and this option are enabled, only members of groups are able to choose co-authors.';
+$string['displaymail'] = 'Display Mails of users while selecting co-authors';
 $string['displaymail_help'] = "This helps users identify their desired co authors when there are multiples of same names. <br><br>Please be aware of users' privacy.";
 $string['duplicatesubmission'] = 'Duplicate submission for all group members';
 $string['duplicatesubmission_help'] = 'When enabled, the submission from the original author will be duplicated for every co author and vise versa.<br>'
 .'This way all authors of a co author group can see and edit the submission. <br><br>'
-.'Be aware that this setting means a user can multiply his/her submission for every user in the course if he/she juggles through all available co authors.'
-.'It also show false positives with plagiarism plugins because the users have exactly the same submission.';
+.'Be aware that this could result in a user multiplying his/her submission for every user in the course if he/she juggles through all available co authors. '
+.'Plagiarism plugins will show false positives because the users have exactly the same submission.';
 $string['removesubmission'] = 'Remove submission when co-authors are removed';
-$string['removesubmission_help'] = 'When the group members of an author group are changed after a submission by the author, the submission is also removed for the removed authors.'
+$string['removesubmission_help'] = 'When the group members of an author group are changed by the author after a submission was made, the submission is also removed for the removed authors. '
 .'The removed authors then have no submission anymore. This can be useful if the author chose wrong co authors. <br><br>'
-.'But this could result in authors "taking away" other users submissions without them knowing.<br><br>'
+.'Although this could result in authors "taking away" other users submission, a mail can be sent if they are removed from an author group (see option above).<br><br>'
 .'If co authors change their group, the submission will still remain with the original author and the rest of the co authors.';
 
 $string['asdefault'] = 'Save as new default co-authors in this course';

@@ -802,7 +802,7 @@ class assign_submission_author extends assign_submission_plugin
      *
      * @param int $author
      * @param int[] $coauthors
-     * @param int[] $removedauthors array of removed authors if appicable
+     * @param int[] $removedauthors array of removed authors
      * @throws coding_exception
      * @throws dml_exception
      */
@@ -818,16 +818,20 @@ class assign_submission_author extends assign_submission_plugin
                 array('context' => $this->assignment->get_context()));
         $a->assignmenturl = $CFG->wwwroot . '/mod/assign/view.php?id=' . $this->assignment->get_course_module()->id;
         $subject = get_string('subject', 'assignsubmission_author', $a);
-        $message = get_string('message', 'assignsubmission_author', $a);
 
-        // Every new co author.
-        foreach ($coauthors as $coauthor) {
-            $userto = core_user::get_user($coauthor);
+        // Iterate over both arrays at the same time and differentiate later to not duplicate code.
+        foreach (array_merge($coauthors, $removedauthors) as $userid) {
+            $userto = core_user::get_user($userid);
             $eventdata = new \core\message\message;
             $eventdata->modulename = 'assign';
             $eventdata->userfrom = $USER;
             $eventdata->userto = $userto;
             $eventdata->subject = $subject;
+            if (in_array($userid, $coauthors)) { // Distinct message if the user was added or removed.
+                $message = get_string('message', 'assignsubmission_author', $a);
+            } else {
+                $message = get_string('message_deleted', 'assignsubmission_author', $a);
+            }
             $eventdata->fullmessage = $message;
             $eventdata->fullmessageformat = FORMAT_PLAIN;
             $eventdata->fullmessagehtml = $message;
@@ -842,28 +846,6 @@ class assign_submission_author extends assign_submission_plugin
             message_send($eventdata);
         }
 
-        // Every deleted co author.
-        $message = get_string('message_deleted', 'assignsubmission_author', $a);
-        foreach ($removedauthors as $removedauthor) {
-            $userto = core_user::get_user($removedauthor);
-            $eventdata = new \core\message\message;
-            $eventdata->modulename = 'assign';
-            $eventdata->userfrom = $USER;
-            $eventdata->userto = $userto;
-            $eventdata->subject = $subject;
-            $eventdata->fullmessage = $message;
-            $eventdata->fullmessageformat = FORMAT_PLAIN;
-            $eventdata->fullmessagehtml = $message;
-            $eventdata->smallmessage = $subject;
-            $eventdata->name = 'assign_notification';
-            $eventdata->component = 'mod_assign';
-            $eventdata->notification = 1;
-            $eventdata->contexturl = $CFG->wwwroot . '/mod/assign/view.php?id=' . $this->assignment->get_course_module()->id;
-            $eventdata->contexturlname = format_string($this->assignment->get_instance()->name, true, array(
-                    'context' => $this->assignment->get_context()
-            ));
-            message_send($eventdata);
-        }
     }
 
     /**

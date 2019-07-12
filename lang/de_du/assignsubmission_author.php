@@ -54,23 +54,23 @@ $string['message_deleted'] = 'Kurs <a href="{$a->courseurl}">{$a->coursename}</a
 $string['setting_explanation'] = 'Diese Einstellungen sind deaktiviert, wenn die "'.$string['author'].'" Checkbox in dem Abschnitt "{$a->submisiontypesstring}" oben nicht gesetzt ist.';
 $string['maxauthors'] = 'Max. Anzahl Autoren pro Gruppe';
 $string['maxauthors_help'] = 'Die maximale Anzahl an Autoren pro Gruppe beinhaltet den Autor sowie die Co-Autoren, z. B. bedeutet "1", dass keine Co-Autoren zulässig sind, "2" das ein weiterer Co-Autor zulässig ist.';
-$string['ingroupsonly'] = 'Nur in der selben Gruppe';
-$string['ingroupsonly_help'] = 'Wenn diese Option ausgewählt ist, können Teilnehmer/innen nur aus der eigenen Gruppe Co-Autoren auswählen, wenn nicht, dann aus dem ganzen Kurs.';
+$string['ingroupsonly'] = 'Nur aus der selben Gruppe';
+$string['ingroupsonly_help'] = 'Teilnehmer/innen können nur aus der eigenen Gruppe Co-Autoren auswählen.';
 $string['notification'] = 'Benachrichtung aller Co-Autoren';
 $string['notification_help'] = 'Alle Co-Autoren werden bei einer Abgabe benachrichtigt und, wenn sie von einer Ko-Autoren Gruppe entfernt werden.';
-$string['groupsused'] = 'Gruppenmodus aktiv?';
+$string['groupsused'] = 'Nutzer müssen in einer Gruppe sein';
 $string['groupsused_help'] = 'Ist der Gruppenmodus aktiviert und diese Option wird ausgewählt, dann wird zur Nutzung von Autorengruppen vorausgesetzt, dass der Teilnehmer in eine Gruppe eingetragen ist. Ist er es nicht, kann er keine Autorengruppe auswählen.';
-$string['displaymail'] = 'Mail-Adresse von Nutzern neben ihren Namen anzeigen';
+$string['displaymail'] = 'Mail-Adresse von Nutzern bei Auswahl der Co-Autoren anzeigen';
 $string['displaymail_help'] = "Dies hilft Nutzern, ihre gewünschten Co-Autoren zu identifizieren, wenn es mehrfach den gleichen Namen gibt. <br><br>Bitte beachte die Privatsphäre der Nutzer.";
 $string['duplicatesubmission'] = 'Dupliziere die Abgabe für alle Gruppenmitglieder';
-$string['duplicatesubmission_help'] = 'Wenn aktiviert, wird die Abgabe des Originalautors für jeden Mitautor dupliziert und umgekehrt'
+$string['duplicatesubmission_help'] = 'Wenn aktiviert, wird die Abgabe des Originalautors für jeden Mitautor dupliziert und umgekehrt. '
 .'Auf diese Weise können alle Autoren einer Co-Autorengruppe die Abgabe sehen und bearbeiten. <br><br>'
-.'Beachten Sie, dass diese Einstellung bedeutet, dass ein Benutzer seine Einreichung für jeden Benutzer im Kurs vervielfachen kann, wenn er durch alle verfügbaren Co-Autoren jongliert. <br>'
+.'Beachten Sie, dass ein Benutzer seine Einreichung für jeden Benutzer im Kurs vervielfachen könnte, wenn er/sie durch alle verfügbaren Co-Autoren jongliert. <br>'
 .'Es führt auch zu Falschanzeigen bei Plagiat-Plugins, weil die Benutzer genau die gleiche Abgabe haben.';
 $string['removesubmission'] = 'Entferne die Abgabe, wenn Co-Autoren entfernt werden';
-$string['removesubmission_help'] = 'Wenn die Gruppenmitglieder einer Autorengruppe nach einer Eingabe durch den Autor geändert werden, wird auch die Abgabe für die entfernten Autoren entfernt'
-.'Die entfernten Autoren haben dann keine Abgabe mehr. Dies kann nützlich sein, wenn der Autor falsche Co-Autoren ausgewählt hat. <br><br>'
-.'Dies könnte jedoch dazu führen, dass Autoren anderen Nutzern Abgaben "weg nehmen", ohne dass diese davon wissen.<br><br>'
+$string['removesubmission_help'] = 'Wenn die Mitglieder einer Autorengruppe nach einer Abgabe durch den Autor geändert werden, wird auch die Abgabe für die entfernten Autoren entfernt. '
+.'Die entfernten Autoren besitzen dann keine Abgabe mehr. Dies kann nützlich sein, wenn der Autor falsche Co-Autoren ausgewählt hat. <br><br>'
+.'Obwohl dies dazu führen kann, dass der Autor anderen Benutzern die Einreichung "wegnehmen" kann, kann eine E-Mail gesendet werden, wenn Co-Autoren aus einer Autorengruppe entfernt werden (siehe Option oben).<br><br>'
 .'Wenn Ko-Autoren ihre Gruppe wechseln, bleibt die Einreichung beim ursprünglichen Autor und beim Rest der Ko-Autoren erhalten.';
 
 $string['asdefault'] = 'Als neue Standard-Co-Autoren für diesen Kurs speichern';
