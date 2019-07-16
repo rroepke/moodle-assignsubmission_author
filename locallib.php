@@ -68,7 +68,21 @@ class assign_submission_author extends assign_submission_plugin
      */
     public function get_settings(MoodleQuickForm $mform) {
         // Get config infos.
-        $settings = $this->get_config();
+        if ($this->assignment->has_instance()) {
+            // There is no config if a new submission is created.
+            $settings = $this->get_config();
+        } else {
+            // Default settings for new submissions.
+            $settings = new stdClass();
+            $settings->enabled = true;
+            $settings->maxauthors = 1;
+            $settings->notification = true;
+            $settings->groupsused = false;
+            $settings->ingroupsonly = false;
+            $settings->displaymail = true;
+            $settings->duplicatesubmission = true;
+            $settings->removesubmission = true;
+        }
 
         // Generate maxauthors setting.
         $options = array();
@@ -97,21 +111,21 @@ class assign_submission_author extends assign_submission_plugin
         $mform->disabledIf('assignsubmissionauthor_maxauthors', 'assignsubmission_author_enabled', 'notchecked');
 
         // Display notification setting.
-        $mform->addElement('checkbox', 'assignsubmissionauthor_notification', get_string('notification', 'assignsubmission_author'), '', 0);
+        $mform->addElement('advcheckbox', 'assignsubmissionauthor_notification', get_string('notification', 'assignsubmission_author'), '', 0);
         $mform->setType('assignsubmissionauthor_notification', PARAM_BOOL);
-        $mform->setDefault('assignsubmissionauthor_notification', isset($settings->notification) ? $settings->notification : true);
+        $mform->setDefault('assignsubmissionauthor_notification', $settings->notification);
         $mform->addHelpButton('assignsubmissionauthor_notification', 'notification', 'assignsubmission_author');
         $mform->disabledIf('assignsubmissionauthor_notification', 'assignsubmission_author_enabled', 'notchecked');
 
         // Display groupsused setting.
-        $mform->addElement('checkbox', 'assignsubmissionauthor_groupsused', get_string('groupsused', 'assignsubmission_author'), '', 0);
+        $mform->addElement('advcheckbox', 'assignsubmissionauthor_groupsused', get_string('groupsused', 'assignsubmission_author'), '', 0);
         $mform->setType('assignsubmissionauthor_groupsused', PARAM_BOOL);
         $mform->setDefault('assignsubmissionauthor_groupsused', $settings->groupsused);
         $mform->addHelpButton('assignsubmissionauthor_groupsused', 'groupsused', 'assignsubmission_author');
         $mform->disabledIf('assignsubmissionauthor_groupsused', 'assignsubmission_author_enabled', 'notchecked');
 
         // Display ingroupsonly setting.
-        $mform->addElement('checkbox', 'assignsubmissionauthor_ingroupsonly', get_string('ingroupsonly', 'assignsubmission_author'), '', 0);
+        $mform->addElement('advcheckbox', 'assignsubmissionauthor_ingroupsonly', get_string('ingroupsonly', 'assignsubmission_author'), '', 0);
         $mform->setType('assignsubmissionauthor_ingroupsonly', PARAM_BOOL);
         $mform->setDefault('assignsubmissionauthor_ingroupsonly', $settings->ingroupsonly);
         $mform->addHelpButton('assignsubmissionauthor_ingroupsonly', 'ingroupsonly', 'assignsubmission_author');
@@ -119,23 +133,23 @@ class assign_submission_author extends assign_submission_plugin
         $mform->disabledIf('assignsubmissionauthor_ingroupsonly', 'assignsubmission_author_enabled', 'notchecked');
 
         // Display option to show emails of user in selection.
-        $mform->addElement('checkbox', 'assignsubmissionauthor_displaymail', '', get_string('displaymail', 'assignsubmission_author'));
+        $mform->addElement('advcheckbox', 'assignsubmissionauthor_displaymail', '', get_string('displaymail', 'assignsubmission_author'));
         $mform->setType('assignsubmissionauthor_displaymail', PARAM_BOOL);
-        $mform->setDefault('assignsubmissionauthor_displaymail', isset($settings->displaymail) ? $settings->displaymail : true);
+        $mform->setDefault('assignsubmissionauthor_displaymail', $settings->displaymail);
         $mform->addHelpButton('assignsubmissionauthor_displaymail', 'displaymail', 'assignsubmission_author');
         $mform->disabledIf('assignsubmissionauthor_displaymail', 'assignsubmission_author_enabled', 'notchecked');
 
         // Display option to duplicate each submission so co authors can see and edit them.
-        $mform->addElement('checkbox', 'assignsubmissionauthor_duplicatesubmission', '', get_string('duplicatesubmission', 'assignsubmission_author'));
+        $mform->addElement('advcheckbox', 'assignsubmissionauthor_duplicatesubmission', '', get_string('duplicatesubmission', 'assignsubmission_author'));
         $mform->setType('assignsubmissionauthor_duplicatesubmission', PARAM_BOOL);
-        $mform->setDefault('assignsubmissionauthor_duplicatesubmission', isset($settings->duplicatesubmission) ? $settings->duplicatesubmission : true);
+        $mform->setDefault('assignsubmissionauthor_duplicatesubmission', $settings->duplicatesubmission);
         $mform->addHelpButton('assignsubmissionauthor_duplicatesubmission', 'duplicatesubmission', 'assignsubmission_author');
         $mform->disabledIf('assignsubmissionauthor_duplicatesubmission', 'assignsubmission_author_enabled', 'notchecked');
 
         // Display option to remove the submissions of removed co authors.
-        $mform->addElement('checkbox', 'assignsubmissionauthor_removesubmission', '', get_string('removesubmission', 'assignsubmission_author'));
+        $mform->addElement('advcheckbox', 'assignsubmissionauthor_removesubmission', '', get_string('removesubmission', 'assignsubmission_author'));
         $mform->setType('assignsubmissionauthor_removesubmission', PARAM_BOOL);
-        $mform->setDefault('assignsubmissionauthor_removesubmission', isset($settings->removesubmission) ? $settings->removesubmission : true);
+        $mform->setDefault('assignsubmissionauthor_removesubmission', $settings->removesubmission);
         $mform->addHelpButton('assignsubmissionauthor_removesubmission', 'removesubmission', 'assignsubmission_author');
         $mform->disabledIf('assignsubmissionauthor_removesubmission', 'assignsubmission_author_enabled', 'notchecked');
         $mform->disabledIf('assignsubmissionauthor_removesubmission', 'assignsubmissionauthor_duplicatesubmission', 'notchecked');
@@ -148,28 +162,18 @@ class assign_submission_author extends assign_submission_plugin
      * @return bool
      */
     public function save_settings(stdClass $data) {
-        // Set config info.
-        $checkmaxauthors = isset($data->assignsubmissionauthor_maxauthors);
-        $this->set_config('maxauthors', $checkmaxauthors ? $data->assignsubmissionauthor_maxauthors : 0);
+        $this->set_config('maxauthors', $data->assignsubmissionauthor_maxauthors);
+        $this->set_config('notification', $data->assignsubmissionauthor_notification);
 
-        $checkgroupsused = isset($data->assignsubmissionauthor_groupsused) && $data->assignsubmissionauthor_groupsused == 1;
-        $checkingroupsonly = isset($data->assignsubmissionauthor_ingroupsonly);
-        $this->set_config('ingroupsonly', $checkgroupsused ? ($checkingroupsonly ? $data->assignsubmissionauthor_ingroupsonly : 0) : 0);
+        $this->set_config('groupsused', $data->assignsubmissionauthor_groupsused);
+        $setable = ($data->assignsubmissionauthor_groupsused == true && $data->assignsubmissionauthor_ingroupsonly == true);
+        $this->set_config('ingroupsonly', $setable); // Can only be set if groupsused is also set.
 
-        $checknotification = isset($data->assignsubmissionauthor_notification);
-        $this->set_config('notification', $checknotification ? $data->assignsubmissionauthor_notification : 0);
+        $this->set_config('displaymail', $data->assignsubmissionauthor_displaymail);
 
-        $checkgroupsused = isset($data->assignsubmissionauthor_groupsused);
-        $this->set_config('groupsused', $checkgroupsused ? $data->assignsubmissionauthor_groupsused : 0);
-
-        $checkgroupsused = isset($data->assignsubmissionauthor_displaymail);
-        $this->set_config('displaymail', $checkgroupsused ? $data->assignsubmissionauthor_displaymail : 0);
-
-        $checkgroupsused = isset($data->assignsubmissionauthor_duplicatesubmission);
-        $this->set_config('duplicatesubmission', $checkgroupsused ? $data->assignsubmissionauthor_duplicatesubmission : 0);
-
-        $checkgroupsused = isset($data->assignsubmissionauthor_removesubmission);
-        $this->set_config('removesubmission', $checkgroupsused ? $data->assignsubmissionauthor_removesubmission : 0);
+        $this->set_config('duplicatesubmission', $data->assignsubmissionauthor_duplicatesubmission);
+        $setable = ($data->assignsubmissionauthor_removesubmission == true && $data->assignsubmissionauthor_duplicatesubmission == true);
+        $this->set_config('removesubmission', $setable); // Can only be set if duplicatesubmission is also set.
         return true;
     }
 
