@@ -110,11 +110,11 @@ class utilities {
      *
      * @param array $defaults
      * @param array $possibles
-     * @param $count
+     * @param $maxauthors
      * @return boolean true if default coauthors can be used
      */
-    public static function is_default_usable($defaults, $possibles, $count) {
-        if (count($defaults) > $count - 1) {
+    public static function is_default_usable($defaults, $possibles, $maxauthors) {
+        if (count($defaults) > $maxauthors - 1) {
             return false;
         }
         foreach (array_keys($defaults) as $author) {
