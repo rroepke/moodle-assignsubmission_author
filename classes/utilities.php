@@ -52,9 +52,6 @@ class utilities {
 
         return false;
     }
-    /*
-     * Notice: Trying to get property 'id' of non-object in /vagrant/wwwmoodle/mod/assign/submission/author/classes/utilities.php on line 73
-     */
 
     /**
      * Get the author ids and names as an array
@@ -91,7 +88,7 @@ class utilities {
     /**
      * Read out the selected coauthors and returns their ids in an array
      *
-     * @param stdClass $data
+     * @param \stdClass $data
      * @return int[] selected coauthor ids
      */
     public static function get_selected_coauthors($data) {
@@ -113,11 +110,11 @@ class utilities {
      *
      * @param array $defaults
      * @param array $possibles
-     * @param $count
+     * @param $maxauthors
      * @return boolean true if default coauthors can be used
      */
-    public static function is_default_usable($defaults, $possibles, $count) {
-        if (count($defaults) > $count - 1) {
+    public static function is_default_usable($defaults, $possibles, $maxauthors) {
+        if (count($defaults) > $maxauthors - 1) {
             return false;
         }
         foreach (array_keys($defaults) as $author) {
